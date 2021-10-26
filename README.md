@@ -1,18 +1,18 @@
-# Laravel Redirector
+# Laravel Request Response Logger
 
-A PHP laravel package to handle missing or permanent redirector in more structured way
+A PHP laravel package to log the request/response of an app in database in more structured way.
 
 ## Installation
 
 Require the package using composer:
 
 ```bash
-composer require touhidurabir/laravel-redirector
+composer require touhidurabir/laravel-request-response-logger
 ```
 
 To publish the config and migration file:
 ```bash
-php artisan vendor:publish --provider="Touhidurabir\Redirector\RedirectorServiceProvider"
+php artisan vendor:publish --provider="Touhidurabir\RequestResponseLogger\RequestResponseLoggerServiceProvider"
 ```
 
 

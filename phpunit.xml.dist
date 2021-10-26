@@ -10,7 +10,7 @@
          processIsolation="false"
          stopOnFailure="false">
     <testsuites>
-        <testsuite name="Laravel Redirector TestSuite">
+        <testsuite name="Laravel Request Response Logger TestSuite">
             <directory>tests</directory>
         </testsuite>
     </testsuites>
