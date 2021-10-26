@@ -1,0 +1,41 @@
+{
+    "name": "touhidurabir/laravel-request-response-logger",
+    "description": "A PHP laravel package to log the request/response of an app in database in more structured way.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Touhidurabir\\RequestResponseLogger\\": "src/"
+        }
+    },
+    "autoload-dev" : {
+        "psr-4" : {
+            "Touhidurabir\\RequestResponseLogger\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Touhidur Rahman",
+            "email": "abircse06@gmail.com"
+        }
+    ],
+    "require-dev": {
+        "orchestra/testbench": "^6.22",
+        "phpunit/phpunit": "^9.5"
+    },
+    "require": {
+        "php": ">=7.4",
+        "touhidurabir/laravel-model-uuid": "^1.0",
+        "illuminate/support": "^8.67"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Touhidurabir\\RequestResponseLogger\\RequestResponseLoggerServiceProvider"
+            ],
+            "aliases": {
+                "RequestResponseLogger": "Touhidurabir\\RequestResponseLogger\\Facades\\RequestResponseLogger"
+            }
+        }
+    }
+}
