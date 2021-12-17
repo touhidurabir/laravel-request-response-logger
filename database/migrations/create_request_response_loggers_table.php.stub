@@ -1,0 +1,75 @@
+<?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class CreateRequestResponseLoggersTable extends Migration {
+
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up() {
+
+        $tableName = config('request-response-logger.table');
+
+        $this->verifyTableName($tableName);
+
+        if ( Schema::hasTable($tableName) ) {
+
+            throw new \Exception("Error: a table of name {$table} already exists in database.");
+        }
+
+        Schema::create($tableName, function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('uuid')->unique()->nullable();
+            $table->string('request_method')->nullable();
+            $table->longText('request_headers')->nullable();
+            $table->longText('request_body')->nullable();
+            $table->text('request_url')->nullable();
+            $table->string('request_ip')->nullable();
+            $table->bigInteger('request_auth_user_id')->unsigned()->index()->nullable();
+            $table->longText('response_headers')->nullable();
+            $table->longText('response_body')->nullable();
+            $table->string('response_status_code')->nullable();
+            $table->boolean('marked')->default(false);
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+    }
+
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down() {
+
+        $tableName = config('request-response-logger.table');
+
+        $this->verifyTableName($tableName);
+
+        Schema::drop($tableName);
+    }
+
+
+    /**
+     * Reverse the migrations.
+     *
+     * @param  string $table
+     * @return void
+     * 
+     * @throws \Exception
+     */
+    protected function verifyTableName(string $table) {
+
+        if ( ! $table ) {
+            throw new \Exception("Error: redirector table not defined in config/redirector.php. Make sure that config/redirector.php loaded properly and table defined there. Run [php artisan config:clear] and try again.");
+        }
+    }
+
+}
