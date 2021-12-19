@@ -12,6 +12,7 @@ return [
     */
     'table' => 'request_response_loggers',
 
+
     /*
     |--------------------------------------------------------------------------
     | Eloquent Model
@@ -21,6 +22,7 @@ return [
     |
     */
     'model' => Touhidurabir\RequestResponseLogger\Models\RequestResponseLogger::class,
+
     
     /*
     |--------------------------------------------------------------------------
@@ -32,15 +34,6 @@ return [
     */
     'log_on_queue' => true,
 
-    /*
-    |--------------------------------------------------------------------------
-    | Clear On Jobs
-    |--------------------------------------------------------------------------
-    |
-    | Define should run clearing process on Queue Job.
-    |
-    */
-    'clear_on_queue' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -56,6 +49,7 @@ return [
         'clear' => Touhidurabir\RequestResponseLogger\Jobs\DeleteRequestResponse::class,
     ],
 
+
     /*
     |--------------------------------------------------------------------------
     | JSON to ARRAY Cast
@@ -65,6 +59,7 @@ return [
     |
     */
     'json_to_array_on_retrieve' => true,
+
 
     /*
     |--------------------------------------------------------------------------
@@ -76,6 +71,7 @@ return [
     |
     */
     'store_on_redis' => true,
+
 
     /*
     |--------------------------------------------------------------------------

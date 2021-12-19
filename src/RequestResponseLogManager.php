@@ -8,13 +8,28 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Database\Eloquent\Builder;
 use Touhidurabir\ModelUuid\UuidGenerator\Generator as UuidGenerator;
+use Touhidurabir\RequestResponseLogger\Concerns\JobDispatchableMethod;
 
 class RequestResponseLogManager {
 
+    use JobDispatchableMethod;
+
+    /**
+     * The eloquent query builder instance
+     * 
+     * @var object<\Illuminate\Database\Eloquent\Builder>
+     */
     protected $query;
 
-    public static function forDeletion() : static {
+
+    /**
+     * Static constructor to create a new instacne with initialized query builder instance
+     * 
+     * @return static
+     */
+    public static function withQuery() : static {
 
         $static = new static;
 
@@ -25,30 +40,80 @@ class RequestResponseLogManager {
         return $static;
     }
 
+
+    /**
+     * Set the keep till last defined hours records
+     * 
+     * @param  int $hours
+     * @return static
+     */
     public function keepTill(int $hours = null) : self {
 
-        return $this;
-    }
+        if ( $hours ) {
 
-    public function onlyUnmarked() : self {
-
-        return $this;
-    }
-
-    public function withTranshed() : self {
+            $this->query = $this->query->where('created_at', '<', now()->subHours($hours));
+        }
 
         return $this;
     }
 
-    public function delete(int $limit = 1000) : int {
 
-        return $this->query->limit($limit)->delete();
+    /**
+     * Define if should keep the marked records
+     * 
+     * @param  bool $deleteWithMarked
+     * @return static
+     */
+    public function withMarked(bool $onlyMarked = false) : self {
+
+        if ( ! $onlyMarked ) {
+
+            $this->query = $this->query->where('marked', 'false');
+        }
+
+        return $this;
     }
 
+
+    /**
+     * Define if should take soft deleted record into account
+     * 
+     * @param  bool $onlyTrashed
+     * @return static
+     */
+    public function withTrashed(bool $onlyTrashed = false) : self {
+
+        if ( $onlyTrashed ) {
+
+            $this->query = $this->query->withTrashed();
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * Force delete records from the table
+     * 
+     * @param  int $limit
+     * @return int
+     */
+    public function remove(int $limit = 1000) : int {
+
+        return $this->query->limit($limit)->forceDelete();
+    }
+
+
+    /**
+     * Get the current query builder 
+     * 
+     * @return object<\Illuminate\Database\Eloquent\Builder>
+     */
     public function getQuery() {
 
         return $this->query;
     }
+
 
     /**
      * Store the request and response log
@@ -113,7 +178,7 @@ class RequestResponseLogManager {
      */
     protected function storeInDatabase(array $storeable, bool $onBatch = false) : void {
 
-        $method = $this->getDispatchMethod();
+        $method = $this->getDispatchMethod(config('request-response-logger.log_on_queue'));
 
         $jobClass = config('request-response-logger.jobs.log');
 
@@ -169,23 +234,6 @@ class RequestResponseLogManager {
 
             throw $exception;
         }
-    }
-
-
-    /**
-     * provide Legacy support for older versions of Laravel that named the synchronous
-     * `dispatchNow` as well as newer versions that use `dispatchSync`.
-     *
-     * @return string
-     */
-    protected function getDispatchMethod() : string {
-
-        if ( config('request-response-logger.log_on_queue') ) {
-
-            return 'dispatch';
-        }
-        
-        return (int)app()->version() < 8 ? 'dispatchNow' : 'dispatchSync';
     }
 
 

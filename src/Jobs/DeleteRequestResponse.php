@@ -7,6 +7,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Touhidurabir\RequestResponseLogger\RequestResponseLogManager;
 use Touhidurabir\RequestResponseLogger\Jobs\Middleware\WithoutOverlappingOfCleaningJob;
 
 class DeleteRequestResponse implements ShouldQueue {
@@ -30,29 +31,33 @@ class DeleteRequestResponse implements ShouldQueue {
 
 
     /**
-     * 
+     * Keep the last provided hours record
      * 
      * @var int
      */
     public $keepTillLast;
 
 
+    /**
+     * Remove only unmarked data/recoreds
+     * 
+     * @var bool
+     */
     public $onlyUnmarked;
-
-    public $withTrashed;
 
 
     /**
      * Create a new job instance.
      * 
-     * @param  array $data
+     * @param  int  $keepTillLast
+     * @param  bool $onlyUnmarked
+     * 
      * @return void 
      */
-    public function __construct(int $keepTillLast = null, bool $onlyUnmarked = false, bool $withTrashed = false) {
+    public function __construct(int $keepTillLast = null, bool $onlyUnmarked = false) {
 
         $this->keepTillLast = $keepTillLast;
         $this->onlyUnmarked = $onlyUnmarked;
-        $this->withTrashed  = $withTrashed;
     }
 
 
@@ -63,29 +68,15 @@ class DeleteRequestResponse implements ShouldQueue {
      */
     public function handle(): void {
 
-        $modelClass = config('request-response-logger.model');
-
-        $query = $modelClass::query();
-
-        if ( $this->keepTillLast ) {
-
-            $query = $query->where('created_at', '<', now()->subHours($this->keepTillLast));
-        }
-
-        if ( $this->onlyUnmarked ) {
-
-            $query = $query->where('marked', false);
-        }
-
-        if ( $this->withTrashed ) {
-
-            $query = $query->withTrasned();
-        }
-        $numberOfRecordsDeleted = $query->limit(1000)->delete();
+        $numberOfRecordsToDeleted = RequestResponseLogManager::withQuery()
+                                        ->keepTill($this->keepTillLast)
+                                        ->withMarked(!$this->onlyUnmarked)
+                                        ->remove(1000);
+                                    
         
-        if ($numberOfRecordsDeleted > 0) {
+        if ($numberOfRecordsToDeleted > 0) {
 
-            self::dispatch($this->keepTillLast, $this->onlyUnmarked, $this->withTrashed);
+            self::dispatch($this->keepTillLast, $this->onlyUnmarked);
         }
     }
 

@@ -5,6 +5,7 @@ namespace Touhidurabir\RequestResponseLogger;
 use Illuminate\Support\Collection;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\ServiceProvider;
+use Touhidurabir\RequestResponseLogger\RequestResponseLogManager;
 use Touhidurabir\RequestResponseLogger\Console\RequestResponseLogCleaner;
 use Touhidurabir\RequestResponseLogger\Console\RequestResponseLoggerExporter;
 
@@ -46,6 +47,9 @@ class RequestResponseLoggerServiceProvider extends ServiceProvider {
             __DIR__.'/../config/request-response-logger.php', 'request-response-logger'
         );
 
+        $this->app->bind('request-response-logger', function ($app) {
+            return new RequestResponseLogManager;
+        });
     }
 
 
