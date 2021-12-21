@@ -67,16 +67,16 @@ class StoreRequestResponse implements ShouldQueue {
      */
     public function handle(): void {
 
-        if ( $batch ) {
+        if ( $this->batch ) {
 
-            $table = config('log-requests-and-responses.logging_model');
+            $table = config('request-response-logger.logging_model');
 
             DB::table($table)->insert($this->data);
 
             return;
         }
 
-        $model = config('log-requests-and-responses.logging_model');
+        $model = config('request-response-logger.model');
 
         (new $model)->create($this->data);
     }

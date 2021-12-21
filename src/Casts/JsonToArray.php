@@ -52,10 +52,15 @@ class JsonToArray implements CastsAttributes {
     /**
      * Checks if the given expected value is valid json string.
      *
-     * @param  string  $value
+     * @param  mixed  $value
      * @return boolean
      */
-    public function isValidJson(string $value) : bool {
+    public function isValidJson($value) : bool {
+
+        if ( ! is_string($value) ) {
+
+            return false;
+        }
 
         json_decode($value);
         

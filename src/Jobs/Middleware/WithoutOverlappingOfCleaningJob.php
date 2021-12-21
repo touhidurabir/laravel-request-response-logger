@@ -19,6 +19,32 @@ class WithoutOverlappingOfCleaningJob {
      */
     public function handle($job, $next) {
 
+        try {
+
+            $redis = Redis::connection();
+
+            if ( $redis->ping() ) {
+
+                $this->lockHandler($job, $next);
+            }
+
+        } catch (Throwable $exception) {
+
+            $next($job);
+        }
+    }
+
+
+    /**
+     * Handle the redis locking process
+     *
+     * @param  mixed        $job
+     * @param  callable     $next
+     * 
+     * @return mixed
+     */
+    protected function lockHandler($job, $next) {
+
         $lock = Cache::store(config('cache.default') ?? 'redis')
                     ->lock("{$job->resolveName()}_lock", 10 * 60);
 
@@ -33,4 +59,5 @@ class WithoutOverlappingOfCleaningJob {
 
         $lock->release();
     }
+    
 }

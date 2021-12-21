@@ -25,6 +25,7 @@ class RequestResponseLogCleaner extends Command {
      */
     protected $signature = 'request-response-logger:clear
                             {--keep-till-last=  : Keep the record that has stored in the last given hours}
+                            {--limit=           : Number of records to delete in per dispatch}
                             {--only-unmarked    : Delete only the unmarked records}
                             {--on-job           : Run the deletion process through a Queue Job}';
 
@@ -64,7 +65,12 @@ class RequestResponseLogCleaner extends Command {
 
             $method = $this->getDispatchMethod($this->option('on-job'));
 
-            $queueJob::{$method}($this->option('keep-till-last'), $this->option('only-unmarked'));
+            $queueJob::{$method}(
+                $this->option('keep-till-last'), 
+                $this->option('only-unmarked'),
+                $this->option('limit') ?? config('request-response-logger.delete_in_segment_count'),
+                $method
+            );
             
         } catch (Throwable $exception) {
             

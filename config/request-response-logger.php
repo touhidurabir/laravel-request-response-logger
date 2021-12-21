@@ -21,7 +21,7 @@ return [
     | Define the model to for this database table.
     |
     */
-    'model' => Touhidurabir\RequestResponseLogger\Models\RequestResponseLogger::class,
+    'model' => \Touhidurabir\RequestResponseLogger\Models\RequestResponseLogger::class,
 
     
     /*
@@ -45,8 +45,8 @@ return [
     |
     */
     'jobs' => [
-        'log' => Touhidurabir\RequestResponseLogger\Jobs\StoreRequestResponse::class,
-        'clear' => Touhidurabir\RequestResponseLogger\Jobs\DeleteRequestResponse::class,
+        'log' => \Touhidurabir\RequestResponseLogger\Jobs\StoreRequestResponse::class,
+        'clear' => \Touhidurabir\RequestResponseLogger\Jobs\DeleteRequestResponse::class,
     ],
 
 
@@ -126,4 +126,16 @@ return [
     |
     */
     'fallback_on_redis_failure' => true,
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Number of records to delete in each job dispatch
+    |--------------------------------------------------------------------------
+    |
+    | The number of records to delete in segmented order in case of async delete
+    | through queue job.
+    |
+    */
+    'delete_in_segment_count' => 1000,
 ];

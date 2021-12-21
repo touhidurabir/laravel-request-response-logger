@@ -95,12 +95,17 @@ class RequestResponseLogManager {
     /**
      * Force delete records from the table
      * 
-     * @param  int $limit
+     * @param  mixed<int|null> $limit
      * @return int
      */
-    public function remove(int $limit = 1000) : int {
+    public function remove(int $limit = null) : int {
 
-        return $this->query->limit($limit)->forceDelete();
+        if ( $limit ) {
+
+            return $this->query->limit($limit)->forceDelete();
+        }
+
+        return $this->query->forceDelete();
     }
 
 
@@ -123,7 +128,7 @@ class RequestResponseLogManager {
      * 
      * @return void
      */
-    public function store(Request $request, Response $response) : void {
+    public function store($request, $response) : void {
 
         $storebale = $this->getStoreable($request, $response);
 
@@ -146,7 +151,7 @@ class RequestResponseLogManager {
      * 
      * @return array
      */
-    public function getStoreable(Request $request, Response $response) : array {
+    public function getStoreable($request, $response) : array {
 
         return [
             'request_method'        => $request->method(),

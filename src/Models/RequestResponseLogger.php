@@ -6,6 +6,7 @@ use Touhidurabir\ModelUuid\HasUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Touhidurabir\RequestResponseLogger\Casts\JsonToArray;
 
@@ -57,6 +58,17 @@ class RequestResponseLogger extends Model {
     public function getTable() {
 
         return config('request-response-logger.table', parent::getTable());
+    }
+
+
+    /**
+     * Get the user who owns this record entry
+     *
+     * @return object<\Illuminate\Database\Eloquent\Relations\BelongsTo>
+     */
+    public function user() : BelongsTo {
+
+        return $this->belongsTo(config('auth.providers.users.model'), 'request_auth_user_id');
     }
     
 

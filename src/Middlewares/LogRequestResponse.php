@@ -31,7 +31,7 @@ class LogRequestResponse {
      * 
      * @return void
      */
-    public function terminate(Request $request, Response $response) : void {
+    public function terminate($request, $response) : void {
 
         (new RequestResponseLogManager)->store($request, $response);
     }
