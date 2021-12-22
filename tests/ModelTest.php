@@ -10,31 +10,13 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Model;
 use Touhidurabir\RequestResponseLogger\Tests\App\Models\User;
 use Touhidurabir\RequestResponseLogger\Tests\Traits\LaravelTestBootstrapping;
+use Touhidurabir\RequestResponseLogger\Tests\Traits\TestDatabaseBootstraping;
 
 class ModelTest extends TestCase {
     
     use LaravelTestBootstrapping;
 
-    /**
-     * Define database migrations.
-     *
-     * @return void
-     */
-    protected function defineDatabaseMigrations() {
-
-        include_once(__DIR__ . '/../database/migrations/create_request_response_loggers_table.php.stub');
-
-        $this->loadMigrationsFrom(__DIR__ . '/App/database/migrations');
-        
-        $this->artisan('migrate', ['--database' => 'testbench'])->run();
-
-        (new \CreateRequestResponseLoggersTable)->up();
-
-        $this->beforeApplicationDestroyed(function () {
-            $this->artisan('migrate:rollback', ['--database' => 'testbench'])->run();
-        });
-    }
-
+    use TestDatabaseBootstraping;
 
     /**
      * @test

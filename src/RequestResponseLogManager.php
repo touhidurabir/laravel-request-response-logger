@@ -29,7 +29,7 @@ class RequestResponseLogManager {
      * 
      * @return static
      */
-    public static function withQuery() : static {
+    public static function withQuery() : self {
 
         $static = new static;
 
@@ -59,16 +59,16 @@ class RequestResponseLogManager {
 
 
     /**
-     * Define if should keep the marked records
+     * Define if should pull records with specific marked status
      * 
-     * @param  bool $deleteWithMarked
+     * @param  bool $marked
      * @return static
      */
-    public function withMarked(bool $onlyMarked = false) : self {
+    public function withMarkedStatus(bool $marked = null) : self {
 
-        if ( ! $onlyMarked ) {
+        if ( ! is_null($marked) ) {
 
-            $this->query = $this->query->where('marked', 'false');
+            $this->query = $this->query->where('marked', $marked);
         }
 
         return $this;

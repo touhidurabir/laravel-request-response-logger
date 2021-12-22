@@ -76,7 +76,7 @@ class DeleteRequestResponse implements ShouldQueue {
      * @return void 
      */
     public function __construct(int     $keepTillLast   = null, 
-                                bool    $onlyUnmarked   = false, 
+                                bool    $onlyUnmarked   = null, 
                                 int     $limit          = null,
                                 string  $dispatchMethod = null) {
 
@@ -96,7 +96,7 @@ class DeleteRequestResponse implements ShouldQueue {
 
         $numberOfRecordsToDeleted = RequestResponseLogManager::withQuery()
                                         ->keepTill($this->keepTillLast)
-                                        ->withMarked(!$this->onlyUnmarked)
+                                        ->withMarkedStatus($this->onlyUnmarked)
                                         ->remove($this->limit);
                                     
         

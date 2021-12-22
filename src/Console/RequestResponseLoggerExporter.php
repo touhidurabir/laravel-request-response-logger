@@ -5,9 +5,9 @@ namespace Touhidurabir\RequestResponseLogger\Console;
 use Exception;
 use Throwable;
 use Illuminate\Console\Command;
-use Illuminate\Http\FileHelpers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
+use Touhidurabir\RequestResponseLogger\Concerns\FileHelpers;
 use Touhidurabir\RequestResponseLogger\RequestResponseLogManager;
 use Touhidurabir\RequestResponseLogger\Console\Concerns\CommandExceptionHandler;
 
@@ -27,12 +27,12 @@ class RequestResponseLoggerExporter extends Command {
      * @var string
      */
     protected $signature = 'request-response-logger:export
-                            {name               : Name of the CSV file to store in storage directory}
+                            {--filename=        : Name of the CSV file to store in storage directory}
                             {--path=            : The absolute file store path if decided to store other than storage directory}
-                            {--replace=         : If such file exists at given location, replace it with new file}
                             {--of-last=         : Export only last provided hours records}
+                            {--replace          : If such file exists at given location, replace it with new file}
                             {--only-marked      : Export only marked records}
-                            {--with-trashed     : Expoer records along with soft deleted entries}';
+                            {--with-trashed     : Export records along with soft deleted entries}';
 
 
     /**
@@ -79,15 +79,15 @@ class RequestResponseLoggerExporter extends Command {
             // load the records to export as lazy collection
             $records = RequestResponseLogManager::withQuery()
                             ->keepTill($this->option('of-last'))
-                            ->withMarked($this->option('only-marked'))
+                            ->withMarkedStatus($this->option('only-marked') ? true : null)
                             ->withTrashed($this->option('with-trashed'))
                             ->getQuery()
                             ->cursor();
-
+            
             // write the data/records in the CSV file
             foreach ($records as $record) {
-
-                fputcsv($fp, $record);
+                
+                fputcsv($fp, $record->toArray());
             }
 
             fclose($fp);
@@ -95,6 +95,8 @@ class RequestResponseLoggerExporter extends Command {
             $this->info('Exporting has completed');
             
         } catch (Throwable $exception) {
+
+            ray($exception);
             
             $this->outputConsoleException($exception);
 
@@ -111,7 +113,7 @@ class RequestResponseLoggerExporter extends Command {
      */
     protected function generateFileToExport() : string {
 
-        $name = $this->option('name') . '.csv';
+        $name = ($this->option('filename') ?? str_replace(' ', '_', now()->toString())) . '.csv';
 
         $path = storage_path();
 
@@ -134,7 +136,7 @@ class RequestResponseLoggerExporter extends Command {
                 throw new Exception(sprintf("The given file [%s] already existed at given [%s] path", $name, $path));
             }
 
-            $this->remove($fileFullPath);
+            $this->removeFile($fileFullPath);
 
             $this->newFileWithContent($fileFullPath, '');
         }

@@ -67,7 +67,7 @@ class RequestResponseLogCleaner extends Command {
 
             $queueJob::{$method}(
                 $this->option('keep-till-last'), 
-                $this->option('only-unmarked'),
+                $this->option('only-unmarked') ? false : null,
                 $this->option('limit') ?? config('request-response-logger.delete_in_segment_count'),
                 $method
             );
