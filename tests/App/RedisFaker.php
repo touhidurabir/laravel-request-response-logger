@@ -1,9 +1,6 @@
 <?php
 
-// https://www.digitalocean.com/community/tutorials/getting-started-with-redis-in-php
-
 namespace Touhidurabir\RequestResponseLogger\Tests\App;
-
 
 class RedisFaker {
 
@@ -34,6 +31,7 @@ class RedisFaker {
         $this->configs = $configs;
         $this->storage = [];
     }
+
 
     /**
      * Get the fake redis connection instance itself
@@ -203,5 +201,4 @@ class RedisFaker {
 
         return $this->storage[$key];
     }
-
 }

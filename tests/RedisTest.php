@@ -3,6 +3,7 @@
 namespace Touhidurabir\RequestResponseLogger\Tests;
 
 use Orchestra\Testbench\TestCase;
+use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Config;
@@ -37,7 +38,7 @@ class RedisTest extends TestCase {
 
         parent::setUp();
 
-        // https://laracasts.com/discuss/channels/testing/how-can-i-test-a-custom-package-that-use-facades?page=1
+        // $app = new Container();
 
         $this->app->singleton('redis', function ($app) {
 
@@ -165,5 +166,5 @@ class RedisTest extends TestCase {
         $this->assertEquals(0, Redis::llen(config('request-response-logger.redis_key_name')));
         $this->assertEquals(RequestResponseLogger::count(), 2);
     }
-    
+
 }

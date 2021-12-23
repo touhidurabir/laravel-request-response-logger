@@ -95,7 +95,7 @@ class RequestResponseLoggerRedisImport extends Command {
             
         } catch (Throwable $exception) {
 
-            ray($exception);
+            // ray($exception);
             
             $this->outputConsoleException($exception);
 
