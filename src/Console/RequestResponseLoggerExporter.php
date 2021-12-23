@@ -93,14 +93,16 @@ class RequestResponseLoggerExporter extends Command {
             fclose($fp);
 
             $this->info('Exporting has completed');
+
+            return self::SUCCESS;
             
         } catch (Throwable $exception) {
 
-            ray($exception);
+            // ray($exception);
             
             $this->outputConsoleException($exception);
 
-            return 1;
+            return self::FAILURE;
         }
     }
 

@@ -71,12 +71,16 @@ class RequestResponseLogCleaner extends Command {
                 $this->option('limit') ?? config('request-response-logger.delete_in_segment_count'),
                 $method
             );
+
+            return self::SUCCESS;
             
         } catch (Throwable $exception) {
+
+            // ray($exception);
             
             $this->outputConsoleException($exception);
 
-            return 1;
+            return self::FAILURE;
         }
     }
 

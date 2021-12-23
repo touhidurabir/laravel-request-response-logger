@@ -243,9 +243,9 @@ class RequestResponseLogManager {
 
             $maxRedisListLimit = abs(config('request-response-logger.max_redis_count') ?? 10000);
 
-            $storeInSegmentCount = abs(config('request-response-logger.redis_store_in_segment_count') ?? 500);
-
             if ( $redis->llen($listKey) >= $maxRedisListLimit ) {
+
+                $storeInSegmentCount = abs(config('request-response-logger.redis_store_in_segment_count') ?? 500);
 
                 while( $storeables = $redis->lrange($listKey, 0, $storeInSegmentCount-1) ) {
 
