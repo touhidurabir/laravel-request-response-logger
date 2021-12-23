@@ -1,5 +1,7 @@
 <?php
 
+namespace Touhidurabir\RequestResponseLogger\Tests;
+
 use Illuminate\Http\Request;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Facades\Hash;

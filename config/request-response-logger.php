@@ -82,7 +82,21 @@ return [
     | the process to move those data in batch to database table.
     |
     */
-    'max_redis_count' => 1000,
+    'max_redis_count' => 10000,
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Number of records to store in DB at a time
+    |--------------------------------------------------------------------------
+    |
+    | This define the number of records to pull from redis list to pull and push
+    | into the DB table at a time when the max_redis_count hit . This to make 
+    | sure that DB table insertion process not to get halted when inseting a 
+    | large number of data at a time.
+    |
+    */
+    'redis_store_in_segment_count' => 500,
 
 
     /*

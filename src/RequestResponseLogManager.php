@@ -25,6 +25,30 @@ class RequestResponseLogManager {
 
 
     /**
+     * The redis connector instance
+     * 
+     * @var object<\Illuminate\Redis\Connectors\PhpRedisConnector>
+     */
+    protected $redis;
+
+
+    /**
+     * Static constructor to create a new instance with passed pre configured redis connection
+     * 
+     * @param  object redis
+     * @return self
+     */
+    public static function withRedis($redis) : self {
+
+        $static = new static;
+
+        $static->redis = $redis;
+
+        return $static;
+    }
+
+
+    /**
      * Static constructor to create a new instacne with initialized query builder instance
      * 
      * @return static
@@ -203,28 +227,34 @@ class RequestResponseLogManager {
 
         try {
 
-            $redis = Redis::connection(config('request-response-logger.redis_configs'));
+            $redis = $this->getRedisInstance();
 
             $listKey = config('request-response-logger.redis_key_name');
 
-            $storeable = array_merge([
-                'uuid' => UuidGenerator::uuid4(),
-            ], $storeable);
+            $storeable = array_merge($storeable, [
+                'uuid'              => UuidGenerator::uuid4(),
+                'request_headers'   => $this->stringify($storeable['request_headers']),
+                'request_body'      => $this->stringify($storeable['request_body']),
+                'response_headers'  => $this->stringify($storeable['response_headers']),
+                'response_body'     => $this->stringify($storeable['response_body']),
+            ]);
 
             $redis->rpush($listKey, json_encode($storeable));
 
-            $maxRedisListLimit = abs(config('request-response-logger.max_redis_count') ?? 1000);
+            $maxRedisListLimit = abs(config('request-response-logger.max_redis_count') ?? 10000);
+
+            $storeInSegmentCount = abs(config('request-response-logger.redis_store_in_segment_count') ?? 500);
 
             if ( $redis->llen($listKey) >= $maxRedisListLimit ) {
 
-                while( $storeables = $redis->lrange($listKey, 0, $maxRedisListLimit-1) ) {
+                while( $storeables = $redis->lrange($listKey, 0, $storeInSegmentCount-1) ) {
 
                     $this->storeInDatabase(
                         collect($storeables)->map(fn($data) => json_decode($data, true))->toArray(), 
                         true
                     );
                     
-                    $redis->ltrim($listKey, $maxRedisListLimit, -1);
+                    $redis->ltrim($listKey, $storeInSegmentCount, -1);
                 }
             }
 
@@ -264,6 +294,38 @@ class RequestResponseLogManager {
         }
 
         return null;
+    }
+
+
+    /**
+     * Get the useable redis instance
+     * 
+     * @return object<\Illuminate\Redis\Connectors\PhpRedisConnector>
+     */
+    protected function getRedisInstance() {
+
+        return $this->redis ?? Redis::connection(config('request-response-logger.redis_configs'));
+    }
+
+
+    /**
+     * Convert passed data to string
+     * 
+     * @return mixed<null|string>
+     */
+    protected function stringify($data) : ?string {
+        
+        if ( $data instanceof Collection ) {
+            
+            return json_encode($data->toArray());
+        }
+
+        if ( is_array($data) ) {
+
+            return json_encode($data);
+        }
+
+        return $data;
     }
 
 }

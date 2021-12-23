@@ -58,26 +58,27 @@ trait LaravelTestBootstrapping {
         $app['config']->set('app.cipher', 'AES-256-CBC');
         
         $app['config']->set('request-response-logger', [
-            'table'                     => 'request_response_loggers',
-            'model'                     => RequestResponseLoggerModel::class,
-            'log_on_queue'              => false,
-            'jobs'                      => [
-                'log' => \Touhidurabir\RequestResponseLogger\Jobs\StoreRequestResponse::class,
+            'table'                         => 'request_response_loggers',
+            'model'                         => RequestResponseLoggerModel::class,
+            'log_on_queue'                  => false,
+            'jobs'                          => [
+                'log'   => \Touhidurabir\RequestResponseLogger\Jobs\StoreRequestResponse::class,
                 'clear' => \Touhidurabir\RequestResponseLogger\Jobs\DeleteRequestResponse::class,
             ],
-            'json_to_array_on_retrieve' => true,
-            'store_on_redis'            => false,
-            'max_redis_count'           => 2,
-            'redis_key_name'            => 'request_response_log',
-            'redis_configs'             => [
+            'json_to_array_on_retrieve'     => true,
+            'store_on_redis'                => false,
+            'max_redis_count'               => 4,
+            'redis_store_in_segment_count'  => 2,
+            'redis_key_name'                => 'request_response_log',
+            'redis_configs'                 => [
                 'url'       => env('REDIS_URL'),
                 'host'      => env('REDIS_HOST', '127.0.0.1'),
                 'password'  => env('REDIS_PASSWORD', null),
                 'port'      => env('REDIS_PORT', '6379'),
                 'database'  => env('REDIS_DB', '0'),
             ],
-            'fallback_on_redis_failure' => false,
-            'delete_in_segment_count'   => 2,
+            'fallback_on_redis_failure'     => true,
+            'delete_in_segment_count'       => 2,
         ]);
     }
     
