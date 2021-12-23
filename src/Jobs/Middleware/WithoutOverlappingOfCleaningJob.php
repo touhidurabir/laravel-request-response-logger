@@ -48,7 +48,7 @@ class WithoutOverlappingOfCleaningJob {
         $lock = Cache::store(config('cache.default') ?? 'redis')
                     ->lock("{$job->resolveName()}_lock", 10 * 60);
 
-        if (! $lock->get()) {
+        if ( ! $lock->get() ) {
             
             $job->delete();
 

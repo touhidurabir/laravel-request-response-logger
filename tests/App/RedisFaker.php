@@ -187,6 +187,18 @@ class RedisFaker {
 
 
     /**
+     * Ping the redis connection to get status
+     *
+     * @param  bool $response
+     * @return bool
+     */
+    public function ping(bool $response = true) : bool {
+
+        return $response;
+    }
+
+
+    /**
      * Get the reference of specific storage in the list specified by key
      *
      * @param  string $key
