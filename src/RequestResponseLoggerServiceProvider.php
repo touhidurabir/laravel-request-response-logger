@@ -8,6 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Touhidurabir\RequestResponseLogger\RequestResponseLogManager;
 use Touhidurabir\RequestResponseLogger\Console\RequestResponseLogCleaner;
 use Touhidurabir\RequestResponseLogger\Console\RequestResponseLoggerExporter;
+use Touhidurabir\RequestResponseLogger\Console\RequestResponseLoggerRedisImport;
 
 class RequestResponseLoggerServiceProvider extends ServiceProvider {
     
@@ -23,6 +24,7 @@ class RequestResponseLoggerServiceProvider extends ServiceProvider {
             $this->commands([
                 RequestResponseLogCleaner::class,
                 RequestResponseLoggerExporter::class,
+                RequestResponseLoggerRedisImport::class,
             ]);
         }
 
