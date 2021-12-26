@@ -32,7 +32,7 @@ return [
     | Define should run storing process on Queue Job.
     |
     */
-    'log_on_queue' => true,
+    'log_on_queue' => false,
 
 
     /*
@@ -70,7 +70,7 @@ return [
     | database write.
     |
     */
-    'store_on_redis' => true,
+    'store_on_redis' => false,
 
 
     /*

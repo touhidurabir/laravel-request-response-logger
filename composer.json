@@ -1,6 +1,6 @@
 {
     "name": "touhidurabir/laravel-request-response-logger",
-    "description": "A PHP laravel package to log the request/response of an app in database in more structured way.",
+    "description": "A PHP laravel package to log the request/response of an app in database in an elegant way with the utilization of Queue and Redis combined",
     "type": "library",
     "license": "MIT",
     "autoload": {
