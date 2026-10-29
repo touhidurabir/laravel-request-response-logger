@@ -4,6 +4,7 @@ namespace Touhidurabir\RequestResponseLogger\Tests;
 
 use PHPUnit\Framework\Attributes\Test;
 use Orchestra\Testbench\TestCase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -226,6 +227,27 @@ class CommandsTest extends TestCase
 
         $this->assertCount(2, $lines);
         $this->assertStringContainsString('201', $lines[1]);
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_export_command_default_file_name_is_valid_on_every_os()
+    {
+
+        Carbon::setTestNow('2026-01-02 03:04:05');
+
+        $file = storage_path() . '/2026-01-02_030405.csv';
+
+        $this->beforeApplicationDestroyed(fn () => File::delete($file));
+
+        $this->assertEquals(0, $this->exportCommand->execute([]));
+
+        Carbon::setTestNow();
+
+        $this->assertTrue(File::exists($file));
     }
 
 }

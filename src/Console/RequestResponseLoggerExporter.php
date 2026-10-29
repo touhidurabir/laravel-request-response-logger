@@ -118,7 +118,8 @@ class RequestResponseLoggerExporter extends Command
     protected function generateFileToExport(): string
     {
 
-        $name = ($this->option('filename') ?? str_replace(' ', '_', now()->toString())) . '.csv';
+        // the default name has no characters that are invalid in a file name on any OS, like ':'
+        $name = ($this->option('filename') ?? now()->format('Y-m-d_His')) . '.csv';
 
         $path = storage_path();
 

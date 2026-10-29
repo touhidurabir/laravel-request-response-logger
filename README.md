@@ -156,7 +156,7 @@ protected function schedule(Schedule $schedule) {
 }
 ```
 
-Unless a specific file name is passed with the option **`--filename`** for this command , it will use the current Datetime as the name of the file . 
+Unless a specific file name is passed with the option **`--filename`** for this command , it will use the current Datetime as the name of the file, like **`2026-01-02_030405.csv`** . 
 
 > NOTE that this package currently only export files in CSV format. Also by default it store the exported CSV files in the **`storage`** dierctory unless provided any other path . See the available command options to know more it 
 
