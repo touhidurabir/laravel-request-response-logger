@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\File;
+use Illuminate\Console\OutputStyle;
 use Symfony\Component\Console\Tester\CommandTester;
 use Touhidurabir\RequestResponseLogger\Concerns\FileHelpers;
 use Touhidurabir\RequestResponseLogger\Jobs\DeleteRequestResponse;
@@ -94,6 +95,10 @@ class CommandsTest extends TestCase
      */
     protected function configureTestCommand(string $commandClass)
     {
+
+        // running the migrations through artisan() binds a mocked console output on
+        // older Laravel versions, which would swallow the output of the commands
+        unset($this->app[OutputStyle::class]);
 
         $command = new $commandClass();
         $command->setLaravel($this->app);

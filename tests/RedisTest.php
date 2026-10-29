@@ -15,6 +15,7 @@ use Illuminate\Redis\Connections\Connection;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Console\OutputStyle;
 use Symfony\Component\Console\Tester\CommandTester;
 use Touhidurabir\RequestResponseLogger\Tests\App\RedisFaker;
 use Touhidurabir\RequestResponseLogger\Jobs\StoreRequestResponse;
@@ -128,6 +129,10 @@ class RedisTest extends TestCase
      */
     protected function configureTestCommand(string $commandClass)
     {
+
+        // running the migrations through artisan() binds a mocked console output on
+        // older Laravel versions, which would swallow the output of the commands
+        unset($this->app[OutputStyle::class]);
 
         $command = new $commandClass();
         $command->setLaravel($this->app);

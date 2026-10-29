@@ -3,7 +3,9 @@
 namespace Touhidurabir\RequestResponseLogger\Tests;
 
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\Attributes\RunInSeparateProcess;
+use ReflectionProperty;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Touhidurabir\RequestResponseLogger\Tests\App\Factories\AppRequestResponseLoggerFactory;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -157,18 +159,31 @@ class ModelTest extends TestCase
 
     /**
      * @test
-     * @runInSeparateProcess
      */
     #[Test]
-    #[RunInSeparateProcess]
     public function the_model_uses_the_factory_of_the_app_when_defined()
     {
 
-        require_once __DIR__ . '/App/database/factories/AppRequestResponseLoggerFactory.php';
+        $resolver = new ReflectionProperty(Factory::class, 'factoryNameResolver');
+        $resolver->setAccessible(true);
 
-        $modelClass = config('request-response-logger.model');
+        $previousResolver = $resolver->getValue();
 
-        $this->assertSame('APP', $modelClass::factory()->make()->request_method);
+        // the app's factory for the model, as Laravel resolves it
+        Factory::guessFactoryNamesUsing(function (string $modelName) {
+            return AppRequestResponseLoggerFactory::class;
+        });
+
+        try {
+
+            $modelClass = config('request-response-logger.model');
+
+            $this->assertSame('APP', $modelClass::factory()->make()->request_method);
+
+        } finally {
+
+            $resolver->setValue(null, $previousResolver);
+        }
     }
 
 
