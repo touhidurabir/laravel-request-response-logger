@@ -2,6 +2,7 @@
 
 namespace Touhidurabir\RequestResponseLogger\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Bus;
@@ -24,6 +25,7 @@ class JobsTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function the_model_store_job_will_run() {
 
         Bus::fake();
@@ -41,6 +43,7 @@ class JobsTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function the_model_store_job_store_data_to_table() {
 
         $uuid = UuidGenerator::uuid4();
@@ -58,6 +61,7 @@ class JobsTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function the_model_delete_job_will_run() {
 
         Bus::fake();
@@ -75,6 +79,7 @@ class JobsTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function the_model_delete_job_will_delete_records_from_table() {
 
         $modelClass = config('request-response-logger.model');

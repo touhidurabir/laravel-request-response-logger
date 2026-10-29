@@ -2,6 +2,7 @@
 
 namespace Touhidurabir\RequestResponseLogger\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -21,6 +22,7 @@ class ModelTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function it_will_have_access_to_model_vai_config() {
 
         $this->assertTrue(class_exists(config('request-response-logger.model')));
@@ -30,6 +32,7 @@ class ModelTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function it_is_a_proper_model_class() {
 
         $modelClass = config('request-response-logger.model');
@@ -42,6 +45,7 @@ class ModelTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function it_will_store_data_in_table() {
 
         $modelClass = config('request-response-logger.model');
@@ -57,6 +61,7 @@ class ModelTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function it_can_filter_records_by_defined_scopes() {
 
         $modelClass = config('request-response-logger.model');
@@ -79,6 +84,7 @@ class ModelTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function it_can_handle_related_to_auth_user() {
 
         $user = User::create(['email' => 'testuser@test.com', 'password' => Hash::make('123456')]);
@@ -97,6 +103,7 @@ class ModelTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function it_can_cast_columns_on_store_and_retrival_as_defined_in_config() {
 
         $modelClass = config('request-response-logger.model');

@@ -2,6 +2,7 @@
 
 namespace Touhidurabir\RequestResponseLogger\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -97,6 +98,7 @@ class CommandsTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function the_clear_command_will_run() {
 
         $this->assertEquals($this->clearCommand->execute([]), 0);
@@ -111,6 +113,7 @@ class CommandsTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function the_clear_command_will_delete_records_from__table() {
 
         $this->seedLoggerTable();
@@ -128,6 +131,7 @@ class CommandsTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function the_export_command_will_run() {
 
         $this->assertEquals($this->exportCommand->execute([
@@ -144,6 +148,7 @@ class CommandsTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function the_export_command_will_generate_proper_file() {
 
         $this->assertEquals($this->exportCommand->execute([
@@ -157,6 +162,7 @@ class CommandsTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function the_export_command_will_fail_if_eisxted_file_replacement_no_instructed() {
 
         $this->exportCommand->execute([
@@ -172,6 +178,7 @@ class CommandsTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function the_export_command_will_export_data_into_file() {
 
         $this->seedLoggerTable();

@@ -3,6 +3,7 @@
 namespace Touhidurabir\RequestResponseLogger\Tests;
 
 use Exception;
+use PHPUnit\Framework\Attributes\Test;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
@@ -18,6 +19,7 @@ class DatabaseTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function the_logger_table_in_config_will_run_via_migration() {
 
         include_once(__DIR__ . '/../database/migrations/create_request_response_loggers_table.php.stub');
@@ -31,6 +33,7 @@ class DatabaseTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function the_logger_table_can_be_rolled_back() {
 
         include_once(__DIR__ . '/../database/migrations/create_request_response_loggers_table.php.stub');
@@ -46,6 +49,7 @@ class DatabaseTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function the_migration_will_throw_exception_if_defined_config_table_already_exists() {
 
         include_once(__DIR__ . '/../database/migrations/create_request_response_loggers_table.php.stub');

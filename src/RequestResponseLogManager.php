@@ -71,7 +71,7 @@ class RequestResponseLogManager {
      * @param  int $hours
      * @return static
      */
-    public function keepTill(int $hours = null) : self {
+    public function keepTill(?int $hours = null) : self {
 
         if ( $hours ) {
 
@@ -88,7 +88,7 @@ class RequestResponseLogManager {
      * @param  bool $marked
      * @return static
      */
-    public function withMarkedStatus(bool $marked = null) : self {
+    public function withMarkedStatus(?bool $marked = null) : self {
 
         if ( ! is_null($marked) ) {
 
@@ -122,7 +122,7 @@ class RequestResponseLogManager {
      * @param  mixed<int|null> $limit
      * @return int
      */
-    public function remove(int $limit = null) : int {
+    public function remove(?int $limit = null) : int {
 
         if ( $limit ) {
 

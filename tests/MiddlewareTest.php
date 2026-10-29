@@ -3,6 +3,7 @@
 namespace Touhidurabir\RequestResponseLogger\Tests;
 
 use Illuminate\Http\Request;
+use PHPUnit\Framework\Attributes\Test;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,7 @@ class MiddlewareTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function middleware_saves_the_data_in_table() {
 
         $request = $this->get('/request-response-logger-test');
@@ -58,6 +60,7 @@ class MiddlewareTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function middleware_will_save_data_along_with_auth_user() {
 
         $user = User::create(['email' => 'testuser@test.com', 'password' => Hash::make('123456')]);

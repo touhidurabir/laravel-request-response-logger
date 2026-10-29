@@ -2,6 +2,7 @@
 
 namespace Touhidurabir\RequestResponseLogger\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Redis;
@@ -96,6 +97,7 @@ class RedisTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function middleware_saves_the_data_redis_storage() {
 
         $request = $this->get('/request-response-logger-test');
@@ -111,6 +113,7 @@ class RedisTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function middleware_will_not_saves_the_data_in_model_table_first() {
 
         $request = $this->get('/request-response-logger-test');
@@ -128,6 +131,7 @@ class RedisTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function middleware_will_push_the_data_in_model_table_from_redis_storage_when_hits_max_store_limit() {
         
         for ($i=0; $i < config('request-response-logger.max_redis_count') ; $i++) { 
@@ -144,6 +148,7 @@ class RedisTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function the_redis_import_command_will_run() {
 
         $this->assertEquals($this->redisImportCommand->execute([]), 0);
@@ -153,6 +158,7 @@ class RedisTest extends TestCase {
     /**
      * @test
      */
+    #[Test]
     public function the_redis_import_command_will_import_data_from_redis_storage_to_db() {
 
         $this->get('/request-response-logger-test');

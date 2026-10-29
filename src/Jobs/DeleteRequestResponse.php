@@ -75,10 +75,10 @@ class DeleteRequestResponse implements ShouldQueue {
      * 
      * @return void 
      */
-    public function __construct(int     $keepTillLast   = null, 
-                                bool    $onlyUnmarked   = null, 
-                                int     $limit          = null,
-                                string  $dispatchMethod = null) {
+    public function __construct(?int    $keepTillLast   = null, 
+                                ?bool   $onlyUnmarked   = null, 
+                                ?int    $limit          = null,
+                                ?string $dispatchMethod = null) {
 
         $this->keepTillLast = $keepTillLast;
         $this->onlyUnmarked = $onlyUnmarked;

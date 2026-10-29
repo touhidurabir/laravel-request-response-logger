@@ -74,7 +74,7 @@ class RequestResponseLoggerExporter extends Command {
             Config::set('request-response-logger.json_to_array_on_retrieve', false);
 
             // Write the headers
-            fputcsv($fp, DB::getSchemaBuilder()->getColumnListing(config('request-response-logger.table')));
+            fputcsv($fp, DB::getSchemaBuilder()->getColumnListing(config('request-response-logger.table')), ',', '"', '\\');
 
             // load the records to export as lazy collection
             $records = RequestResponseLogManager::withQuery()
@@ -87,7 +87,7 @@ class RequestResponseLoggerExporter extends Command {
             // write the data/records in the CSV file
             foreach ($records as $record) {
                 
-                fputcsv($fp, $record->toArray());
+                fputcsv($fp, $record->toArray(), ',', '"', '\\');
             }
 
             fclose($fp);
