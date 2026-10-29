@@ -144,6 +144,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Hidden Request Fields
+    |--------------------------------------------------------------------------
+    |
+    | The request body fields that will never be stored in the log. Nested
+    | fields can be defined with "dot" notation, e.g. "user.password".
+    |
+    */
+    'hidden_request_fields' => [
+        'password',
+        'password_confirmation',
+        'current_password',
+    ],
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Number of records to delete in each job dispatch
     |--------------------------------------------------------------------------
     |

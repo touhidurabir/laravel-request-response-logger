@@ -76,4 +76,65 @@ class MiddlewareTest extends TestCase
     }
 
 
+    /**
+     * @test
+     */
+    #[Test]
+    public function middleware_saves_the_request_body()
+    {
+
+        $this->post('/request-response-logger-test', ['name' => 'test user']);
+        $log = RequestResponseLogger::first();
+
+        $this->assertSame(['name' => 'test user'], $log->request_body);
+
+        $this->postJson('/request-response-logger-test', ['name' => 'json user']);
+        $log = RequestResponseLogger::orderBy('id', 'desc')->first();
+
+        $this->assertSame(['name' => 'json user'], $log->request_body);
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function middleware_will_not_save_the_hidden_request_fields()
+    {
+
+        $this->post('/request-response-logger-test', [
+            'email'                 => 'testuser@test.com',
+            'password'              => 'secret',
+            'password_confirmation' => 'secret',
+        ]);
+        $log = RequestResponseLogger::first();
+
+        $this->assertSame(['email' => 'testuser@test.com'], $log->request_body);
+
+        config(['request-response-logger.hidden_request_fields' => ['email']]);
+
+        $this->post('/request-response-logger-test', [
+            'email'     => 'testuser@test.com',
+            'password'  => 'secret',
+        ]);
+        $log = RequestResponseLogger::orderBy('id', 'desc')->first();
+
+        $this->assertSame(['password' => 'secret'], $log->request_body);
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function middleware_saves_the_raw_request_content_when_it_is_not_arrayable()
+    {
+
+        $this->call('POST', '/request-response-logger-test', [], [], [], ['CONTENT_TYPE' => 'text/plain'], 'plain text body');
+        $log = RequestResponseLogger::first();
+
+        $this->assertSame('plain text body', $log->request_body);
+    }
+
+
 }

@@ -40,6 +40,8 @@ Before using it , please make sure to go throught he pushlished config file to k
 
 For example, the ability to push the write task to queue jobs defined by option **`log_on_queue`** and utilize the redis capability defined by option **`store_on_redis`** are set to **`false`** . So depending on your app capabilities and requirements, configure the options as you see fit . 
 
+The request body fields listed in the **`hidden_request_fields`** option are never stored. By default those are **`password`**, **`password_confirmation`** and **`current_password`**. Add any other sensitive field of your app there; nested fields can be defined with "dot" notation, like **`user.password`**. Note that the request and response headers are stored as they are.
+
 ### Setting Up Middleware 
 
 The most important part is is setting up the middleware as all the request/response loggin is done by the provided middleware **`\Touhidurabir\RequestResponseLogger\Middlewares\LogRequestResponse`** by the package . 

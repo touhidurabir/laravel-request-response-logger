@@ -3,6 +3,7 @@
 namespace Touhidurabir\RequestResponseLogger;
 
 use Throwable;
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
@@ -296,7 +297,10 @@ class RequestResponseLogManager
 
         if (! empty($requestBody)) {
 
-            $requestBody;
+            return Arr::except(
+                $requestBody,
+                config('request-response-logger.hidden_request_fields', ['password', 'password_confirmation', 'current_password'])
+            );
         }
 
         if (empty($requestBody) && !empty($request->getContent())) {
