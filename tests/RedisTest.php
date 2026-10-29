@@ -6,6 +6,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Orchestra\Testbench\TestCase;
 use Mockery;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Redis\Connector;
 use Illuminate\Redis\Connections\Connection;
 use Illuminate\Support\Facades\Redis;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Config;
 use Symfony\Component\Console\Tester\CommandTester;
 use Touhidurabir\RequestResponseLogger\Tests\App\RedisFaker;
+use Touhidurabir\RequestResponseLogger\Jobs\StoreRequestResponse;
+use Touhidurabir\RequestResponseLogger\Tests\App\Jobs\FailingBatchStoreRequestResponse;
 use Touhidurabir\RequestResponseLogger\Models\RequestResponseLogger;
 use Touhidurabir\RequestResponseLogger\Middlewares\LogRequestResponse;
 use Touhidurabir\RequestResponseLogger\Tests\Traits\LaravelTestBootstrapping;
@@ -299,6 +302,55 @@ class RedisTest extends TestCase
 
         $this->assertSame('2026-01-02 03:04:05', $log->created_at->toDateTimeString());
         $this->assertSame('2026-01-02 03:04:05', $log->updated_at->toDateTimeString());
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_redis_import_will_skip_the_logs_already_in_the_table()
+    {
+
+        $this->get('/request-response-logger-test');
+        $this->get('/request-response-logger-test');
+
+        // the first log reached the table before, but was not removed from redis
+        $listKey = config('request-response-logger.redis_key_name');
+
+        DB::table(config('request-response-logger.table'))->insert(
+            json_decode(Redis::lrange($listKey, 0, 0)[0], true)
+        );
+
+        $this->assertEquals(0, $this->redisImportCommand->execute([]));
+
+        $this->assertEquals(0, Redis::llen($listKey));
+        $this->assertEquals(2, RequestResponseLogger::count());
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_redis_fallback_will_not_store_a_log_that_is_already_in_redis()
+    {
+
+        Config::set('request-response-logger.fallback_on_redis_failure', true);
+        Config::set('request-response-logger.max_redis_count', 1);
+        Config::set('request-response-logger.jobs.log', FailingBatchStoreRequestResponse::class);
+
+        // the log is pushed to redis, but moving the full list to the table fails
+        $this->get('/request-response-logger-test');
+
+        $this->assertEquals(1, Redis::llen(config('request-response-logger.redis_key_name')));
+        $this->assertEquals(0, RequestResponseLogger::count());
+
+        Config::set('request-response-logger.jobs.log', StoreRequestResponse::class);
+
+        $this->redisImportCommand->execute([]);
+
+        $this->assertEquals(1, RequestResponseLogger::count());
     }
 
 }

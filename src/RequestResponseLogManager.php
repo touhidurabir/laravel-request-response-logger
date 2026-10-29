@@ -248,6 +248,8 @@ class RequestResponseLogManager
     protected function storeInRedis($storeable)
     {
 
+        $pushed = false;
+
         try {
 
             $redis = $this->getRedisInstance();
@@ -270,6 +272,8 @@ class RequestResponseLogManager
 
             $redis->rpush($listKey, json_encode($storeable));
 
+            $pushed = true;
+
             $maxRedisListLimit = abs(config('request-response-logger.max_redis_count') ?? 10000);
 
             if ($redis->llen($listKey) >= $maxRedisListLimit) {
@@ -291,7 +295,12 @@ class RequestResponseLogManager
 
             if (config('request-response-logger.fallback_on_redis_failure')) {
 
-                $this->storeInDatabase($storeable);
+                // a log that reached redis is moved to the table with the rest of
+                // the list later, storing it now as well would duplicate it
+                if (! $pushed) {
+
+                    $this->storeInDatabase($storeable);
+                }
 
                 return;
             }

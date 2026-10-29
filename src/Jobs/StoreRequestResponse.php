@@ -76,7 +76,7 @@ class StoreRequestResponse implements ShouldQueue
 
             $table = config('request-response-logger.table');
 
-            DB::table($table)->insert($this->data);
+            DB::table($table)->insert($this->withoutStoredLogs($table, $this->data));
 
             return;
         }
@@ -84,5 +84,35 @@ class StoreRequestResponse implements ShouldQueue
         $model = config('request-response-logger.model');
 
         (new $model())->create($this->data);
+    }
+
+
+    /**
+     * Remove the logs that are already in the table
+     *
+     * A batch is only removed from redis after it is stored, so a failure in
+     * between can bring the same logs again. The uuid column is unique, so
+     * inserting them again would fail the whole batch, every time.
+     *
+     * @param  string $table
+     * @param  array  $logs
+     *
+     * @return array
+     */
+    protected function withoutStoredLogs(string $table, array $logs): array
+    {
+
+        $uuids = array_filter(array_column($logs, 'uuid'));
+
+        if (empty($uuids)) {
+
+            return $logs;
+        }
+
+        $storedUuids = DB::table($table)->whereIn('uuid', $uuids)->pluck('uuid')->all();
+
+        return array_values(array_filter($logs, function ($log) use ($storedUuids) {
+            return ! in_array($log['uuid'] ?? null, $storedUuids, true);
+        }));
     }
 }
