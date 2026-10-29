@@ -171,4 +171,42 @@ class ModelTest extends TestCase
         $this->assertSame('APP', $modelClass::factory()->make()->request_method);
     }
 
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function it_will_use_the_table_defined_in_config()
+    {
+
+        $modelClass = config('request-response-logger.model');
+
+        $this->assertSame('request_response_loggers', (new $modelClass())->getTable());
+
+        Config::set('request-response-logger.table', 'custom_request_logs');
+
+        $this->assertSame('custom_request_logs', (new $modelClass())->getTable());
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function it_will_keep_the_values_that_are_not_json_as_they_are()
+    {
+
+        $modelClass = config('request-response-logger.model');
+
+        $log = $modelClass::create([
+            'request_body'  => 'plain text body',
+            'response_body' => '<html></html>',
+        ]);
+
+        $log = $modelClass::find($log->id);
+
+        $this->assertSame('plain text body', $log->request_body);
+        $this->assertSame('<html></html>', $log->response_body);
+    }
+
 }
