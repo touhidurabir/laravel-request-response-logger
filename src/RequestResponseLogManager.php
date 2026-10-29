@@ -86,6 +86,24 @@ class RequestResponseLogManager
 
 
     /**
+     * Set to only the records stored in the last defined hours
+     *
+     * @param  int $hours
+     * @return static
+     */
+    public function ofLast(?int $hours = null): self
+    {
+
+        if ($hours) {
+
+            $this->query = $this->query->where('created_at', '>=', now()->subHours($hours));
+        }
+
+        return $this;
+    }
+
+
+    /**
      * Define if should pull records with specific marked status
      *
      * @param  bool $marked

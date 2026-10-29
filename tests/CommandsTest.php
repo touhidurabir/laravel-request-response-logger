@@ -203,4 +203,29 @@ class CommandsTest extends TestCase
         $this->assertEquals(count($fp), 5);
     }
 
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_export_command_will_export_only_the_records_of_last_given_hours()
+    {
+
+        DB::table(config('request-response-logger.table'))
+            ->insert([
+                ['response_status_code' => '200', 'created_at' => now()->subHours(48)],
+                ['response_status_code' => '201', 'created_at' => now()->subHour()],
+            ]);
+
+        $this->assertEquals($this->exportCommand->execute([
+            '--filename' => $this->exportFileName,
+            '--of-last'  => 24,
+        ]), 0);
+
+        $lines = file(storage_path() . '/' . $this->exportFileName . '.csv', FILE_SKIP_EMPTY_LINES);
+
+        $this->assertCount(2, $lines);
+        $this->assertStringContainsString('201', $lines[1]);
+    }
+
 }

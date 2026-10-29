@@ -80,7 +80,7 @@ class RequestResponseLoggerExporter extends Command
 
             // load the records to export as lazy collection
             $records = RequestResponseLogManager::withQuery()
-                            ->keepTill($this->option('of-last'))
+                            ->ofLast($this->option('of-last'))
                             ->withMarkedStatus($this->option('only-marked') ? true : null)
                             ->withTrashed($this->option('with-trashed'))
                             ->getQuery()
