@@ -3,6 +3,7 @@
 namespace Touhidurabir\RequestResponseLogger\Jobs;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Queue\Jobs\SyncJob;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -95,23 +96,43 @@ class DeleteRequestResponse implements ShouldQueue
     /**
      * Execute the job.
      *
+     * Running synchronously, all the segments are deleted here one after the other,
+     * so that the whole cleaning holds the lock once. On a queue, one segment is
+     * deleted per job and the next segment is queued, so each job stays short.
+     *
      * @return void
      */
     public function handle(): void
     {
 
-        $numberOfRecordsToDeleted = RequestResponseLogManager::withQuery()
-                                        ->keepTill($this->keepTillLast)
-                                        ->withMarkedStatus($this->onlyUnmarked)
-                                        ->remove($this->limit);
+        do {
+
+            $numberOfRecordsToDeleted = RequestResponseLogManager::withQuery()
+                                            ->keepTill($this->keepTillLast)
+                                            ->withMarkedStatus($this->onlyUnmarked)
+                                            ->remove($this->limit);
+
+        } while ($numberOfRecordsToDeleted > 0 && $this->limit && $this->runsSynchronously());
 
 
-        if ($numberOfRecordsToDeleted > 0) {
+        if ($numberOfRecordsToDeleted > 0 && $this->limit && ! $this->runsSynchronously()) {
 
-            $this->method = $this->method ?? $this->getDispatchMethod(false);
+            $this->method = $this->getDispatchMethod(true);
 
             self::{$this->method}($this->keepTillLast, $this->onlyUnmarked, $this->limit, $this->method);
         }
+    }
+
+
+    /**
+     * Determine if the job runs synchronously rather than on a queue
+     *
+     * @return bool
+     */
+    protected function runsSynchronously(): bool
+    {
+
+        return ! $this->job || $this->job instanceof SyncJob;
     }
 
 

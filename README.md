@@ -135,6 +135,8 @@ This package also have some handle options available as such :
 | only-unmarked  | flag    | Delete only the unmarked records                                 |
 | on-job         | flag    | Run the deletion process through a Queue Job                     |
 
+The records are deleted in segments of the **`limit`** option (or the **`delete_in_segment_count`** config). Without **`--on-job`** all the segments are deleted in one go; with it, each segment is deleted by its own queue job, which queues the next one. When Redis is reachable and the default cache store supports locks, only one cleaning job runs at a time: a queued cleaning job that finds another one running is tried again 10 seconds later, and a non queued one is skipped.
+
 
 #### Log Exporter 
 

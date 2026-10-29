@@ -9,6 +9,14 @@ use Illuminate\Support\Facades\Redis;
 class WithoutOverlappingOfCleaningJob
 {
     /**
+     * The seconds after which a queued job that could not get the lock is tried again
+     *
+     * @var int
+     */
+    public $releaseAfter = 10;
+
+
+    /**
      * Handle the acquire and release of lock
      *
      * @param  mixed        $job
@@ -23,15 +31,19 @@ class WithoutOverlappingOfCleaningJob
 
             $redis = Redis::connection();
 
-            if ($redis->ping()) {
-
-                $this->lockHandler($job, $next);
-            }
+            $canLock = (bool) $redis->ping();
 
         } catch (Throwable $exception) {
 
-            $next($job);
+            $canLock = false;
         }
+
+        if (! $canLock) {
+
+            return $next($job);
+        }
+
+        return $this->lockHandler($job, $next);
     }
 
 
@@ -46,19 +58,36 @@ class WithoutOverlappingOfCleaningJob
     protected function lockHandler($job, $next)
     {
 
-        $lock = Cache::store(config('cache.default') ?? 'redis')
-                    ->lock("{$job->resolveName()}_lock", 10 * 60);
+        try {
 
-        if (! $lock->get()) {
+            $lock = Cache::store(config('cache.default') ?? 'redis')
+                        ->lock(get_class($job) . '_lock', 10 * 60);
 
-            $job->delete();
+            $acquired = $lock->get();
+
+        } catch (Throwable $exception) {
+
+            // the cache store does not support locks, run the job without one
+            return $next($job);
+        }
+
+        // another cleaning job is running; a queued job is tried again later,
+        // a sync one is skipped
+        if (! $acquired) {
+
+            $job->release($this->releaseAfter);
 
             return;
         }
 
-        $next($job);
+        try {
 
-        $lock->release();
+            return $next($job);
+
+        } finally {
+
+            $lock->release();
+        }
     }
 
 }
