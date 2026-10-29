@@ -7,8 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Touhidurabir\RequestResponseLogger\Casts\JsonToArray;
+use Touhidurabir\RequestResponseLogger\Database\Factories\RequestResponseLoggerFactory;
 
 class RequestResponseLogger extends Model
 {
@@ -48,6 +50,26 @@ class RequestResponseLogger extends Model
         return [
             'column' => 'uuid'
         ];
+    }
+
+
+    /**
+     * Create a new factory instance for the model
+     *
+     * A factory defined by the app for this model, or a model extending this
+     * one, is resolved by Laravel as usual.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory|null
+     */
+    protected static function newFactory()
+    {
+
+        if (static::class !== self::class || class_exists(Factory::resolveFactoryName(static::class))) {
+
+            return null;
+        }
+
+        return RequestResponseLoggerFactory::new();
     }
 
 

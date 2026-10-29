@@ -3,6 +3,7 @@
 namespace Touhidurabir\RequestResponseLogger\Tests;
 
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -130,6 +131,44 @@ class ModelTest extends TestCase
 
         $this->assertJson($log->response_headers);
         $this->assertJson($log->response_body);
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_model_has_a_factory()
+    {
+
+        $modelClass = config('request-response-logger.model');
+
+        $logs = $modelClass::factory()->count(3)->create();
+
+        $this->assertCount(3, $logs);
+        $this->assertEquals(3, $modelClass::count());
+        $this->assertNotNull($logs->first()->uuid);
+        $this->assertIsArray($logs->first()->request_headers);
+
+        $this->assertTrue($modelClass::factory()->marked()->create()->marked);
+        $this->assertEquals(1, $modelClass::marked()->count());
+    }
+
+
+    /**
+     * @test
+     * @runInSeparateProcess
+     */
+    #[Test]
+    #[RunInSeparateProcess]
+    public function the_model_uses_the_factory_of_the_app_when_defined()
+    {
+
+        require_once __DIR__ . '/App/database/factories/AppRequestResponseLoggerFactory.php';
+
+        $modelClass = config('request-response-logger.model');
+
+        $this->assertSame('APP', $modelClass::factory()->make()->request_method);
     }
 
 }
