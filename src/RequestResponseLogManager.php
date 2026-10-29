@@ -320,7 +320,29 @@ class RequestResponseLogManager
     protected function getRedisInstance()
     {
 
-        return $this->redis ?? Redis::connection(config('request-response-logger.redis_configs'));
+        return $this->redis ?? static::redisConnection();
+    }
+
+
+    /**
+     * Get the redis connection defined by the redis_configs config
+     *
+     * It is either an array of connection details, used as a dedicated connection,
+     * or the name of a connection in config/database.php (null for the default one).
+     *
+     * @return object<\Illuminate\Redis\Connections\Connection>
+     */
+    public static function redisConnection()
+    {
+
+        $configs = config('request-response-logger.redis_configs');
+
+        if (! is_array($configs)) {
+
+            return Redis::connection($configs);
+        }
+
+        return app('request-response-logger.redis')->connection();
     }
 
 

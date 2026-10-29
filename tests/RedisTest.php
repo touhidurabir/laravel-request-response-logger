@@ -4,7 +4,9 @@ namespace Touhidurabir\RequestResponseLogger\Tests;
 
 use PHPUnit\Framework\Attributes\Test;
 use Orchestra\Testbench\TestCase;
-use Illuminate\Container\Container;
+use Mockery;
+use Illuminate\Contracts\Redis\Connector;
+use Illuminate\Redis\Connections\Connection;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Config;
@@ -44,9 +46,7 @@ class RedisTest extends TestCase
 
         $this->app->singleton('redis', function ($app) {
 
-            $config = $app->make('config')->get('request-response-logger.redis_configs', []);
-
-            return new RedisFaker($config);
+            return new RedisFaker();
         });
 
         $this->app->bind('redis.connection', function ($app) {
@@ -58,6 +58,38 @@ class RedisTest extends TestCase
 
         Config::set('request-response-logger.store_on_redis', true);
         Config::set('request-response-logger.fallback_on_redis_failure', false);
+
+        // use the default redis connection, which is the RedisFaker
+        Config::set('request-response-logger.redis_configs', null);
+    }
+
+
+    /**
+     * Fake the connector of the package's dedicated redis manager and return
+     * the redis connection mock it connects to
+     *
+     * @param  array $connectedWith
+     * @return \Mockery\MockInterface
+     */
+    protected function fakeDedicatedRedisConnection(array &$connectedWith)
+    {
+
+        $connection = Mockery::mock(Connection::class)->shouldIgnoreMissing();
+
+        $connector = Mockery::mock(Connector::class);
+        $connector->shouldReceive('connect')->andReturnUsing(function ($config) use ($connection, &$connectedWith) {
+
+            $connectedWith = $config;
+
+            return $connection;
+        });
+
+        $this->app->make('request-response-logger.redis')
+            ->extend(config('database.redis.client', 'phpredis'), function () use ($connector) {
+                return $connector;
+            });
+
+        return $connection;
     }
 
 
@@ -179,6 +211,71 @@ class RedisTest extends TestCase
 
         $this->assertEquals(0, Redis::llen(config('request-response-logger.redis_key_name')));
         $this->assertEquals(RequestResponseLogger::count(), 2);
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_redis_configs_can_name_a_redis_connection()
+    {
+
+        Config::set('request-response-logger.redis_configs', 'logs');
+
+        $this->get('/request-response-logger-test');
+
+        $this->assertContains('logs', $this->app['redis']->connectionNames);
+        $this->assertEquals(1, Redis::llen(config('request-response-logger.redis_key_name')));
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_redis_configs_array_is_used_as_a_dedicated_connection()
+    {
+
+        Config::set('request-response-logger.redis_configs', [
+            'host'      => 'redis.test',
+            'port'      => '6380',
+            'database'  => '3',
+        ]);
+
+        $connectedWith = [];
+
+        $connection = $this->fakeDedicatedRedisConnection($connectedWith);
+        $connection->shouldReceive('rpush')->once()->andReturn(1);
+        $connection->shouldReceive('llen')->andReturn(1);
+
+        $this->get('/request-response-logger-test');
+
+        $this->assertSame('redis.test', $connectedWith['host']);
+        $this->assertSame('6380', $connectedWith['port']);
+        $this->assertSame('3', $connectedWith['database']);
+
+        // nothing went to the app's own redis connection
+        $this->assertEquals(0, Redis::llen(config('request-response-logger.redis_key_name')));
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_redis_import_command_uses_the_dedicated_connection()
+    {
+
+        Config::set('request-response-logger.redis_configs', ['host' => 'redis.test']);
+
+        $connectedWith = [];
+
+        $connection = $this->fakeDedicatedRedisConnection($connectedWith);
+        $connection->shouldReceive('llen')->once()->andReturn(0);
+
+        $this->assertEquals(0, $this->redisImportCommand->execute([]));
+        $this->assertSame('redis.test', $connectedWith['host']);
     }
 
 }

@@ -5,7 +5,7 @@ namespace Touhidurabir\RequestResponseLogger\Console;
 use Exception;
 use Throwable;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Redis;
+use Touhidurabir\RequestResponseLogger\RequestResponseLogManager;
 use Touhidurabir\RequestResponseLogger\Concerns\JobDispatchableMethod;
 use Touhidurabir\RequestResponseLogger\Console\Concerns\CommandExceptionHandler;
 
@@ -60,7 +60,7 @@ class RequestResponseLoggerRedisImport extends Command
 
         try {
 
-            $redis = Redis::connection(config('request-response-logger.redis_configs'));
+            $redis = RequestResponseLogManager::redisConnection();
 
             $listKey = config('request-response-logger.redis_key_name');
 

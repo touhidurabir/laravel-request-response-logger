@@ -35,15 +35,23 @@ class RedisFaker
 
 
     /**
+     * The requested fake redis connection names
+     *
+     * @var array
+     */
+    public $connectionNames = [];
+
+
+    /**
      * Get the fake redis connection instance itself
      *
-     * @param  array $config
+     * @param  string|null $name
      * @return self
      */
-    public function connection(array $configs = []): self
+    public function connection($name = null): self
     {
 
-        $this->configs = $configs;
+        $this->connectionNames[] = $name;
 
         return $this;
     }

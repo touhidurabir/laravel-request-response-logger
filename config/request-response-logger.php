@@ -115,9 +115,10 @@ return [
     | Redis Configuration
     |--------------------------------------------------------------------------
     |
-    | Redis is an open source, fast, and advanced key-value store that also
-    | provides a richer body of commands than a typical key-value system
-    | such as APC or Memcached. Laravel makes it easy to dig right in.
+    | The redis connection used to store the logs. Either an array of connection
+    | details, used as a dedicated connection with the "client" and "options"
+    | of config/database.php, or the name of a redis connection defined in
+    | config/database.php, e.g. 'default' or 'cache'.
     |
     */
     'redis_configs' => [

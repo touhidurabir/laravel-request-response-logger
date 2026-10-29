@@ -42,6 +42,8 @@ For example, the ability to push the write task to queue jobs defined by option 
 
 The request body fields listed in the **`hidden_request_fields`** option are never stored. By default those are **`password`**, **`password_confirmation`** and **`current_password`**. Add any other sensitive field of your app there; nested fields can be defined with "dot" notation, like **`user.password`**. Note that the request and response headers are stored as they are.
 
+The redis connection used by **`store_on_redis`** is defined by the **`redis_configs`** option. It is either an array of connection details (host, port, database, etc.), used as a dedicated connection with the **`client`** and **`options`** of **`config/database.php`**, or the name of a redis connection defined in **`config/database.php`**, like **`'default'`** or **`'cache'`**.
+
 ### Setting Up Middleware 
 
 The most important part is is setting up the middleware as all the request/response loggin is done by the provided middleware **`\Touhidurabir\RequestResponseLogger\Middlewares\LogRequestResponse`** by the package . 
