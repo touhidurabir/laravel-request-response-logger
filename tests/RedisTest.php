@@ -5,6 +5,7 @@ namespace Touhidurabir\RequestResponseLogger\Tests;
 use PHPUnit\Framework\Attributes\Test;
 use Orchestra\Testbench\TestCase;
 use Mockery;
+use Illuminate\Support\Carbon;
 use Illuminate\Contracts\Redis\Connector;
 use Illuminate\Redis\Connections\Connection;
 use Illuminate\Support\Facades\Redis;
@@ -276,6 +277,28 @@ class RedisTest extends TestCase
 
         $this->assertEquals(0, $this->redisImportCommand->execute([]));
         $this->assertSame('redis.test', $connectedWith['host']);
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_logs_stored_in_redis_keep_their_request_time()
+    {
+
+        Carbon::setTestNow('2026-01-02 03:04:05');
+
+        $this->get('/request-response-logger-test');
+
+        Carbon::setTestNow();
+
+        $this->redisImportCommand->execute([]);
+
+        $log = RequestResponseLogger::first();
+
+        $this->assertSame('2026-01-02 03:04:05', $log->created_at->toDateTimeString());
+        $this->assertSame('2026-01-02 03:04:05', $log->updated_at->toDateTimeString());
     }
 
 }

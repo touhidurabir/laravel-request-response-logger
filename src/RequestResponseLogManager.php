@@ -242,8 +242,14 @@ class RequestResponseLogManager
 
             $listKey = config('request-response-logger.redis_key_name');
 
+            // the logs are moved to the table with a batch insert, which does not
+            // fill the timestamps, so store the time of the request with them
+            $requestedAt = now()->toDateTimeString();
+
             $storeable = array_merge($storeable, [
                 'uuid'              => UuidGenerator::uuid4(),
+                'created_at'        => $requestedAt,
+                'updated_at'        => $requestedAt,
                 'request_headers'   => $this->stringify($storeable['request_headers']),
                 'request_body'      => $this->stringify($storeable['request_body']),
                 'response_headers'  => $this->stringify($storeable['response_headers']),
