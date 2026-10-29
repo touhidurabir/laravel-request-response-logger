@@ -13,8 +13,8 @@ use Touhidurabir\RequestResponseLogger\Console\RequestResponseLoggerExporter;
 use Touhidurabir\RequestResponseLogger\Tests\Traits\LaravelTestBootstrapping;
 use Touhidurabir\RequestResponseLogger\Tests\Traits\TestDatabaseBootstraping;
 
-class CommandsTest extends TestCase {
-
+class CommandsTest extends TestCase
+{
     use LaravelTestBootstrapping;
 
     use TestDatabaseBootstraping;
@@ -50,7 +50,8 @@ class CommandsTest extends TestCase {
      *
      * @return void
      */
-    protected function setUp(): void {
+    protected function setUp(): void
+    {
 
         parent::setUp();
 
@@ -58,7 +59,7 @@ class CommandsTest extends TestCase {
         $this->exportCommand = $this->configureTestCommand(RequestResponseLoggerExporter::class);
 
         $this->beforeApplicationDestroyed(
-            fn() => File::delete(storage_path() . '/' . $this->exportFileName . '.csv')
+            fn () => File::delete(storage_path() . '/' . $this->exportFileName . '.csv')
         );
     }
 
@@ -68,7 +69,8 @@ class CommandsTest extends TestCase {
      *
      * @return void
      */
-    protected function seedLoggerTable() {
+    protected function seedLoggerTable()
+    {
 
         DB::table(config('request-response-logger.table'))
             ->insert([
@@ -82,13 +84,14 @@ class CommandsTest extends TestCase {
 
     /**
      * Configure the testable command as dummy command
-     * 
+     *
      * @param  string $commandClass
      * @return object<\Symfony\Component\Console\Tester\CommandTester>
      */
-    protected function configureTestCommand(string $commandClass) {
+    protected function configureTestCommand(string $commandClass)
+    {
 
-        $command = new $commandClass;
+        $command = new $commandClass();
         $command->setLaravel($this->app);
 
         return new CommandTester($command);
@@ -99,7 +102,8 @@ class CommandsTest extends TestCase {
      * @test
      */
     #[Test]
-    public function the_clear_command_will_run() {
+    public function the_clear_command_will_run()
+    {
 
         $this->assertEquals($this->clearCommand->execute([]), 0);
 
@@ -114,7 +118,8 @@ class CommandsTest extends TestCase {
      * @test
      */
     #[Test]
-    public function the_clear_command_will_delete_records_from__table() {
+    public function the_clear_command_will_delete_records_from__table()
+    {
 
         $this->seedLoggerTable();
 
@@ -132,7 +137,8 @@ class CommandsTest extends TestCase {
      * @test
      */
     #[Test]
-    public function the_export_command_will_run() {
+    public function the_export_command_will_run()
+    {
 
         $this->assertEquals($this->exportCommand->execute([
             '--filename' => $this->exportFileName,
@@ -149,7 +155,8 @@ class CommandsTest extends TestCase {
      * @test
      */
     #[Test]
-    public function the_export_command_will_generate_proper_file() {
+    public function the_export_command_will_generate_proper_file()
+    {
 
         $this->assertEquals($this->exportCommand->execute([
             '--filename' => $this->exportFileName,
@@ -163,7 +170,8 @@ class CommandsTest extends TestCase {
      * @test
      */
     #[Test]
-    public function the_export_command_will_fail_if_eisxted_file_replacement_no_instructed() {
+    public function the_export_command_will_fail_if_eisxted_file_replacement_no_instructed()
+    {
 
         $this->exportCommand->execute([
             '--filename' => $this->exportFileName,
@@ -179,7 +187,8 @@ class CommandsTest extends TestCase {
      * @test
      */
     #[Test]
-    public function the_export_command_will_export_data_into_file() {
+    public function the_export_command_will_export_data_into_file()
+    {
 
         $this->seedLoggerTable();
 

@@ -5,21 +5,21 @@ namespace Touhidurabir\RequestResponseLogger;
 use Illuminate\Support\Collection;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\ServiceProvider;
-use Touhidurabir\RequestResponseLogger\RequestResponseLogManager;
 use Touhidurabir\RequestResponseLogger\Console\RequestResponseLogCleaner;
 use Touhidurabir\RequestResponseLogger\Console\RequestResponseLoggerExporter;
 use Touhidurabir\RequestResponseLogger\Console\RequestResponseLoggerRedisImport;
 
-class RequestResponseLoggerServiceProvider extends ServiceProvider {
-    
+class RequestResponseLoggerServiceProvider extends ServiceProvider
+{
     /**
      * Bootstrap any application services.
      *
      * @return void
      */
-    public function boot() {
+    public function boot()
+    {
 
-        if ( $this->app->runningInConsole() ) {
+        if ($this->app->runningInConsole()) {
 
             $this->commands([
                 RequestResponseLogCleaner::class,
@@ -37,20 +37,22 @@ class RequestResponseLoggerServiceProvider extends ServiceProvider {
         ], 'migrations');
     }
 
-    
+
     /**
      * Register any application services.
      *
      * @return void
      */
-    public function register() {
+    public function register()
+    {
 
         $this->mergeConfigFrom(
-            __DIR__.'/../config/request-response-logger.php', 'request-response-logger'
+            __DIR__.'/../config/request-response-logger.php',
+            'request-response-logger'
         );
 
         $this->app->bind('request-response-logger', function ($app) {
-            return new RequestResponseLogManager;
+            return new RequestResponseLogManager();
         });
     }
 
@@ -61,8 +63,9 @@ class RequestResponseLoggerServiceProvider extends ServiceProvider {
      * @param  string $migrationFileName
      * @return string
      */
-    protected function getMigrationFileName($migrationFileName): string {
-        
+    protected function getMigrationFileName($migrationFileName): string
+    {
+
         $timestamp = date('Y_m_d_His');
 
         $filesystem = $this->app->make(Filesystem::class);
@@ -74,5 +77,5 @@ class RequestResponseLoggerServiceProvider extends ServiceProvider {
                         ->push($this->app->databasePath()."/migrations/{$timestamp}_{$migrationFileName}")
                         ->first();
     }
-    
+
 }

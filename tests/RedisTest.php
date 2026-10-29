@@ -16,8 +16,8 @@ use Touhidurabir\RequestResponseLogger\Tests\Traits\LaravelTestBootstrapping;
 use Touhidurabir\RequestResponseLogger\Tests\Traits\TestDatabaseBootstraping;
 use Touhidurabir\RequestResponseLogger\Console\RequestResponseLoggerRedisImport;
 
-class RedisTest extends TestCase {
-    
+class RedisTest extends TestCase
+{
     use LaravelTestBootstrapping;
 
     use TestDatabaseBootstraping;
@@ -35,7 +35,8 @@ class RedisTest extends TestCase {
      *
      * @return void
      */
-    protected function setUp(): void {
+    protected function setUp(): void
+    {
 
         parent::setUp();
 
@@ -59,17 +60,18 @@ class RedisTest extends TestCase {
         Config::set('request-response-logger.fallback_on_redis_failure', false);
     }
 
-    
+
     /**
      * Define routes setup.
      *
      * @param  \Illuminate\Routing\Router  $router
      * @return void
      */
-    protected function defineRoutes($router) {
-        
-        Route::any('/request-response-logger-test', function() {
-            
+    protected function defineRoutes($router)
+    {
+
+        Route::any('/request-response-logger-test', function () {
+
             return response()->json([
                 'status'    => true,
                 'data'      => request()->all(),
@@ -81,13 +83,14 @@ class RedisTest extends TestCase {
 
     /**
      * Configure the testable command as dummy command
-     * 
+     *
      * @param  string $commandClass
      * @return object<\Symfony\Component\Console\Tester\CommandTester>
      */
-    protected function configureTestCommand(string $commandClass) {
+    protected function configureTestCommand(string $commandClass)
+    {
 
-        $command = new $commandClass;
+        $command = new $commandClass();
         $command->setLaravel($this->app);
 
         return new CommandTester($command);
@@ -98,10 +101,11 @@ class RedisTest extends TestCase {
      * @test
      */
     #[Test]
-    public function middleware_saves_the_data_redis_storage() {
+    public function middleware_saves_the_data_redis_storage()
+    {
 
         $request = $this->get('/request-response-logger-test');
-        
+
         $this->assertEquals(1, Redis::llen(config('request-response-logger.redis_key_name')));
 
         $request = $this->get('/request-response-logger-test');
@@ -114,10 +118,11 @@ class RedisTest extends TestCase {
      * @test
      */
     #[Test]
-    public function middleware_will_not_saves_the_data_in_model_table_first() {
+    public function middleware_will_not_saves_the_data_in_model_table_first()
+    {
 
         $request = $this->get('/request-response-logger-test');
-        
+
         $this->assertEquals(1, Redis::llen(config('request-response-logger.redis_key_name')));
         $this->assertEquals(RequestResponseLogger::count(), 0);
 
@@ -132,10 +137,11 @@ class RedisTest extends TestCase {
      * @test
      */
     #[Test]
-    public function middleware_will_push_the_data_in_model_table_from_redis_storage_when_hits_max_store_limit() {
-        
-        for ($i=0; $i < config('request-response-logger.max_redis_count') ; $i++) { 
-            
+    public function middleware_will_push_the_data_in_model_table_from_redis_storage_when_hits_max_store_limit()
+    {
+
+        for ($i = 0; $i < config('request-response-logger.max_redis_count') ; $i++) {
+
             $this->get('/request-response-logger-test');
         }
 
@@ -149,7 +155,8 @@ class RedisTest extends TestCase {
      * @test
      */
     #[Test]
-    public function the_redis_import_command_will_run() {
+    public function the_redis_import_command_will_run()
+    {
 
         $this->assertEquals($this->redisImportCommand->execute([]), 0);
     }
@@ -159,7 +166,8 @@ class RedisTest extends TestCase {
      * @test
      */
     #[Test]
-    public function the_redis_import_command_will_import_data_from_redis_storage_to_db() {
+    public function the_redis_import_command_will_import_data_from_redis_storage_to_db()
+    {
 
         $this->get('/request-response-logger-test');
         $this->get('/request-response-logger-test');

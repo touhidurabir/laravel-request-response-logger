@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Touhidurabir\RequestResponseLogger\Casts\JsonToArray;
 
-class RequestResponseLogger extends Model {
-    
+class RequestResponseLogger extends Model
+{
     use SoftDeletes;
     use HasFactory;
     use HasUuid;
@@ -42,20 +42,22 @@ class RequestResponseLogger extends Model {
      *
      * @return array
      */
-    public function uuidable() : array {
+    public function uuidable(): array
+    {
 
         return [
             'column' => 'uuid'
         ];
     }
-    
+
 
     /**
      * Get the model associated table name
      *
      * @return string
      */
-    public function getTable() {
+    public function getTable()
+    {
 
         return config('request-response-logger.table', parent::getTable());
     }
@@ -66,11 +68,12 @@ class RequestResponseLogger extends Model {
      *
      * @return object<\Illuminate\Database\Eloquent\Relations\BelongsTo>
      */
-    public function user() : BelongsTo {
+    public function user(): BelongsTo
+    {
 
         return $this->belongsTo(config('auth.providers.users.model'), 'request_auth_user_id');
     }
-    
+
 
     /**
      * Local scope a query to only include failed status code responses.
@@ -78,11 +81,12 @@ class RequestResponseLogger extends Model {
      * @param  object<\Illuminate\Database\Eloquent\Builder>  $query
      * @return object<\Illuminate\Database\Eloquent\Builder>
      */
-    public function scopeFailed(Builder $query) {
+    public function scopeFailed(Builder $query)
+    {
 
         return $query->whereNotBetween('response_status_code', [200, 299]);
     }
-    
+
 
     /**
      * Local scope a query to only include success status code responses.
@@ -90,11 +94,12 @@ class RequestResponseLogger extends Model {
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSuccessful(Builder $query) {
+    public function scopeSuccessful(Builder $query)
+    {
 
         return $query->whereBetween('response_status_code', [200, 299]);
     }
-    
+
 
     /**
      * Local scope a query to only include marked records
@@ -102,9 +107,10 @@ class RequestResponseLogger extends Model {
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeMarked(Builder $query) {
+    public function scopeMarked(Builder $query)
+    {
 
         return $query->where('marked', true);
     }
-    
+
 }

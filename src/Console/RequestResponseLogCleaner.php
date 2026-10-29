@@ -8,10 +8,10 @@ use Illuminate\Console\Command;
 use Touhidurabir\RequestResponseLogger\Concerns\JobDispatchableMethod;
 use Touhidurabir\RequestResponseLogger\Console\Concerns\CommandExceptionHandler;
 
-class RequestResponseLogCleaner extends Command {
-
+class RequestResponseLogCleaner extends Command
+{
     use JobDispatchableMethod;
-    
+
     /**
      * Process the handeled exception and provide output
      */
@@ -44,8 +44,9 @@ class RequestResponseLogCleaner extends Command {
      *
      * @return void
      */
-    public function __construct() {
-        
+    public function __construct()
+    {
+
         parent::__construct();
     }
 
@@ -55,8 +56,9 @@ class RequestResponseLogCleaner extends Command {
      *
      * @return mixed
      */
-    public function handle() {
-        
+    public function handle()
+    {
+
         $this->info('Cleaning the records');
 
         try {
@@ -66,18 +68,18 @@ class RequestResponseLogCleaner extends Command {
             $method = $this->getDispatchMethod($this->option('on-job'));
 
             $queueJob::{$method}(
-                $this->option('keep-till-last'), 
+                $this->option('keep-till-last'),
                 $this->option('only-unmarked') ? false : null,
                 $this->option('limit') ?? config('request-response-logger.delete_in_segment_count'),
                 $method
             );
 
             return self::SUCCESS;
-            
+
         } catch (Throwable $exception) {
 
             // ray($exception);
-            
+
             $this->outputConsoleException($exception);
 
             return self::FAILURE;

@@ -9,13 +9,16 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
-class StoreRequestResponse implements ShouldQueue {
-
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+class StoreRequestResponse implements ShouldQueue
+{
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * The max tirex
-     * 
+     *
      * @var int
      */
     public $tries = 3;
@@ -23,7 +26,7 @@ class StoreRequestResponse implements ShouldQueue {
 
     /**
      * Queue timeout
-     * 
+     *
      * @var int
      */
     public $timeout = 20;
@@ -31,7 +34,7 @@ class StoreRequestResponse implements ShouldQueue {
 
     /**
      * Storeable data
-     * 
+     *
      * @var array
      */
     public $data;
@@ -39,7 +42,7 @@ class StoreRequestResponse implements ShouldQueue {
 
     /**
      * Storeable data as batch
-     * 
+     *
      * @var boolean
      */
     public $batch = false;
@@ -47,13 +50,14 @@ class StoreRequestResponse implements ShouldQueue {
 
     /**
      * Create a new job instance.
-     * 
+     *
      * @param  array $data
      * @param  bool  $batch
-     * 
-     * @return void 
+     *
+     * @return void
      */
-    public function __construct($data, $batch = false) {
+    public function __construct($data, $batch = false)
+    {
 
         $this->data = $data;
         $this->batch = $batch;
@@ -65,12 +69,13 @@ class StoreRequestResponse implements ShouldQueue {
      *
      * @return void
      */
-    public function handle(): void {
+    public function handle(): void
+    {
 
-        if ( $this->batch ) {
+        if ($this->batch) {
 
             $table = config('request-response-logger.table');
-            
+
             DB::table($table)->insert($this->data);
 
             return;
@@ -78,6 +83,6 @@ class StoreRequestResponse implements ShouldQueue {
 
         $model = config('request-response-logger.model');
 
-        (new $model)->create($this->data);
+        (new $model())->create($this->data);
     }
 }

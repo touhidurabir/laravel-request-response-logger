@@ -3,27 +3,27 @@
 namespace Touhidurabir\RequestResponseLogger\Jobs\Middleware;
 
 use Throwable;
-use Illuminate\Cache\RedisLock;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
 
-class WithoutOverlappingOfCleaningJob {
-
+class WithoutOverlappingOfCleaningJob
+{
     /**
      * Handle the acquire and release of lock
      *
      * @param  mixed        $job
      * @param  callable     $next
-     * 
+     *
      * @return mixed
      */
-    public function handle($job, $next) {
+    public function handle($job, $next)
+    {
 
         try {
 
             $redis = Redis::connection();
 
-            if ( $redis->ping() ) {
+            if ($redis->ping()) {
 
                 $this->lockHandler($job, $next);
             }
@@ -40,16 +40,17 @@ class WithoutOverlappingOfCleaningJob {
      *
      * @param  mixed        $job
      * @param  callable     $next
-     * 
+     *
      * @return mixed
      */
-    protected function lockHandler($job, $next) {
+    protected function lockHandler($job, $next)
+    {
 
         $lock = Cache::store(config('cache.default') ?? 'redis')
                     ->lock("{$job->resolveName()}_lock", 10 * 60);
 
-        if ( ! $lock->get() ) {
-            
+        if (! $lock->get()) {
+
             $job->delete();
 
             return;
@@ -59,5 +60,5 @@ class WithoutOverlappingOfCleaningJob {
 
         $lock->release();
     }
-    
+
 }

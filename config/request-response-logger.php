@@ -23,7 +23,7 @@ return [
     */
     'model' => \Touhidurabir\RequestResponseLogger\Models\RequestResponseLogger::class,
 
-    
+
     /*
     |--------------------------------------------------------------------------
     | Log/Store On Jobs
@@ -78,7 +78,7 @@ return [
     | Redis Max List Length
     |--------------------------------------------------------------------------
     |
-    | This define the max redis list length on which exceeds, it will initiate 
+    | This define the max redis list length on which exceeds, it will initiate
     | the process to move those data in batch to database table.
     |
     */
@@ -91,8 +91,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | This define the number of records to pull from redis list to pull and push
-    | into the DB table at a time when the max_redis_count hit . This to make 
-    | sure that DB table insertion process not to get halted when inseting a 
+    | into the DB table at a time when the max_redis_count hit . This to make
+    | sure that DB table insertion process not to get halted when inseting a
     | large number of data at a time.
     |
     */
@@ -101,7 +101,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Unique Redis Key name 
+    | Unique Redis Key name
     |--------------------------------------------------------------------------
     |
     | The unique list key name for which the data will to stored in the redis.
@@ -136,7 +136,7 @@ return [
     |
     | If choose to store vai redis and for some reason failed , it will
     | try to run the log store process normally and in database table if
-    | set to true. 
+    | set to true.
     |
     */
     'fallback_on_redis_failure' => true,

@@ -11,10 +11,10 @@ use Touhidurabir\RequestResponseLogger\Concerns\FileHelpers;
 use Touhidurabir\RequestResponseLogger\RequestResponseLogManager;
 use Touhidurabir\RequestResponseLogger\Console\Concerns\CommandExceptionHandler;
 
-class RequestResponseLoggerExporter extends Command {
-
+class RequestResponseLoggerExporter extends Command
+{
     use FileHelpers;
-    
+
     /**
      * Process the handeled exception and provide output
      */
@@ -49,8 +49,9 @@ class RequestResponseLoggerExporter extends Command {
      *
      * @return void
      */
-    public function __construct() {
-        
+    public function __construct()
+    {
+
         parent::__construct();
     }
 
@@ -60,8 +61,9 @@ class RequestResponseLoggerExporter extends Command {
      *
      * @return mixed
      */
-    public function handle() {
-        
+    public function handle()
+    {
+
         $this->info('Initiating the exporting');
 
         try {
@@ -83,10 +85,10 @@ class RequestResponseLoggerExporter extends Command {
                             ->withTrashed($this->option('with-trashed'))
                             ->getQuery()
                             ->cursor();
-            
+
             // write the data/records in the CSV file
             foreach ($records as $record) {
-                
+
                 fputcsv($fp, $record->toArray(), ',', '"', '\\');
             }
 
@@ -95,11 +97,11 @@ class RequestResponseLoggerExporter extends Command {
             $this->info('Exporting has completed');
 
             return self::SUCCESS;
-            
+
         } catch (Throwable $exception) {
 
             // ray($exception);
-            
+
             $this->outputConsoleException($exception);
 
             return self::FAILURE;
@@ -113,17 +115,18 @@ class RequestResponseLoggerExporter extends Command {
      * @return string
      * @throws \Exception
      */
-    protected function generateFileToExport() : string {
+    protected function generateFileToExport(): string
+    {
 
         $name = ($this->option('filename') ?? str_replace(' ', '_', now()->toString())) . '.csv';
 
         $path = storage_path();
 
-        if ( $this->option('path') ) {
+        if ($this->option('path')) {
 
             $path = $this->option('path');
 
-            if ( ! $this->isDirectory($path) ) {
+            if (! $this->isDirectory($path)) {
 
                 throw new Exception(sprintf("The given path [%s] does not exists", $path));
             }
@@ -131,9 +134,9 @@ class RequestResponseLoggerExporter extends Command {
 
         $fileFullPath = $path . '/' . $name;
 
-        if ( $this->fileExists($fileFullPath) ) {
+        if ($this->fileExists($fileFullPath)) {
 
-            if ( ! $this->option('replace') ) {
+            if (! $this->option('replace')) {
 
                 throw new Exception(sprintf("The given file [%s] already existed at given [%s] path", $name, $path));
             }

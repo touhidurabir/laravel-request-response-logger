@@ -2,7 +2,6 @@
 
 namespace Touhidurabir\RequestResponseLogger;
 
-use Exception;
 use Throwable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -12,13 +11,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Touhidurabir\ModelUuid\UuidGenerator\Generator as UuidGenerator;
 use Touhidurabir\RequestResponseLogger\Concerns\JobDispatchableMethod;
 
-class RequestResponseLogManager {
-
+class RequestResponseLogManager
+{
     use JobDispatchableMethod;
 
     /**
      * The eloquent query builder instance
-     * 
+     *
      * @var object<\Illuminate\Database\Eloquent\Builder>
      */
     protected $query;
@@ -26,7 +25,7 @@ class RequestResponseLogManager {
 
     /**
      * The redis connector instance
-     * 
+     *
      * @var object<\Illuminate\Redis\Connectors\PhpRedisConnector>
      */
     protected $redis;
@@ -34,13 +33,14 @@ class RequestResponseLogManager {
 
     /**
      * Static constructor to create a new instance with passed pre configured redis connection
-     * 
+     *
      * @param  object redis
      * @return self
      */
-    public static function withRedis($redis) : self {
+    public static function withRedis($redis): self
+    {
 
-        $static = new static;
+        $static = new static();
 
         $static->redis = $redis;
 
@@ -50,12 +50,13 @@ class RequestResponseLogManager {
 
     /**
      * Static constructor to create a new instacne with initialized query builder instance
-     * 
+     *
      * @return static
      */
-    public static function withQuery() : self {
+    public static function withQuery(): self
+    {
 
-        $static = new static;
+        $static = new static();
 
         $modelClass = config('request-response-logger.model');
 
@@ -67,13 +68,14 @@ class RequestResponseLogManager {
 
     /**
      * Set the keep till last defined hours records
-     * 
+     *
      * @param  int $hours
      * @return static
      */
-    public function keepTill(?int $hours = null) : self {
+    public function keepTill(?int $hours = null): self
+    {
 
-        if ( $hours ) {
+        if ($hours) {
 
             $this->query = $this->query->where('created_at', '<', now()->subHours($hours));
         }
@@ -84,13 +86,14 @@ class RequestResponseLogManager {
 
     /**
      * Define if should pull records with specific marked status
-     * 
+     *
      * @param  bool $marked
      * @return static
      */
-    public function withMarkedStatus(?bool $marked = null) : self {
+    public function withMarkedStatus(?bool $marked = null): self
+    {
 
-        if ( ! is_null($marked) ) {
+        if (! is_null($marked)) {
 
             $this->query = $this->query->where('marked', $marked);
         }
@@ -101,13 +104,14 @@ class RequestResponseLogManager {
 
     /**
      * Define if should take soft deleted record into account
-     * 
+     *
      * @param  bool $onlyTrashed
      * @return static
      */
-    public function withTrashed(bool $onlyTrashed = false) : self {
+    public function withTrashed(bool $onlyTrashed = false): self
+    {
 
-        if ( $onlyTrashed ) {
+        if ($onlyTrashed) {
 
             $this->query = $this->query->withTrashed();
         }
@@ -118,13 +122,14 @@ class RequestResponseLogManager {
 
     /**
      * Force delete records from the table
-     * 
+     *
      * @param  mixed<int|null> $limit
      * @return int
      */
-    public function remove(?int $limit = null) : int {
+    public function remove(?int $limit = null): int
+    {
 
-        if ( $limit ) {
+        if ($limit) {
 
             return $this->query->limit($limit)->forceDelete();
         }
@@ -134,11 +139,12 @@ class RequestResponseLogManager {
 
 
     /**
-     * Get the current query builder 
-     * 
+     * Get the current query builder
+     *
      * @return object<\Illuminate\Database\Eloquent\Builder>
      */
-    public function getQuery() {
+    public function getQuery()
+    {
 
         return $this->query;
     }
@@ -146,17 +152,18 @@ class RequestResponseLogManager {
 
     /**
      * Store the request and response log
-     * 
+     *
      * @param  object<\Illuminate\Http\Request>     $request
      * @param  object<\Illuminate\Http\Response>    $response
-     * 
+     *
      * @return void
      */
-    public function store($request, $response) : void {
+    public function store($request, $response): void
+    {
 
         $storebale = $this->getStoreable($request, $response);
 
-        if ( ! config('request-response-logger.store_on_redis') ) {
+        if (! config('request-response-logger.store_on_redis')) {
 
             $this->storeInDatabase($storebale);
 
@@ -169,13 +176,14 @@ class RequestResponseLogManager {
 
     /**
      * Get the storeable data
-     * 
+     *
      * @param  object<\Illuminate\Http\Request>     $request
      * @param  object<\Illuminate\Http\Response>    $response
-     * 
+     *
      * @return array
      */
-    public function getStoreable($request, $response) : array {
+    public function getStoreable($request, $response): array
+    {
 
         return [
             'request_method'        => $request->method(),
@@ -199,13 +207,14 @@ class RequestResponseLogManager {
 
     /**
      * Store the log data in the database table
-     * 
+     *
      * @param  array    $storeable
      * @param  bool     $onBatch
-     * 
+     *
      * @return void
      */
-    protected function storeInDatabase(array $storeable, bool $onBatch = false) : void {
+    protected function storeInDatabase(array $storeable, bool $onBatch = false): void
+    {
 
         $method = $this->getDispatchMethod(config('request-response-logger.log_on_queue'));
 
@@ -217,13 +226,14 @@ class RequestResponseLogManager {
 
     /**
      * Store the log data in the redis
-     * 
+     *
      * @param  array    $storeable
      * @return void
-     * 
+     *
      * @throws \Exception
      */
-    protected function storeInRedis($storeable) {
+    protected function storeInRedis($storeable)
+    {
 
         try {
 
@@ -243,24 +253,24 @@ class RequestResponseLogManager {
 
             $maxRedisListLimit = abs(config('request-response-logger.max_redis_count') ?? 10000);
 
-            if ( $redis->llen($listKey) >= $maxRedisListLimit ) {
+            if ($redis->llen($listKey) >= $maxRedisListLimit) {
 
                 $storeInSegmentCount = abs(config('request-response-logger.redis_store_in_segment_count') ?? 500);
 
-                while( $storeables = $redis->lrange($listKey, 0, $storeInSegmentCount-1) ) {
+                while ($storeables = $redis->lrange($listKey, 0, $storeInSegmentCount - 1)) {
 
                     $this->storeInDatabase(
-                        collect($storeables)->map(fn($data) => json_decode($data, true))->toArray(), 
+                        collect($storeables)->map(fn ($data) => json_decode($data, true))->toArray(),
                         true
                     );
-                    
+
                     $redis->ltrim($listKey, $storeInSegmentCount, -1);
                 }
             }
 
         } catch (Throwable $exception) {
 
-            if ( config('request-response-logger.fallback_on_redis_failure') ) {
+            if (config('request-response-logger.fallback_on_redis_failure')) {
 
                 $this->storeInDatabase($storeable);
 
@@ -275,20 +285,21 @@ class RequestResponseLogManager {
     /**
      * Check and determine if the request is JSON/Arrayable/XML or
      * some sort of plain text which is not arrayable
-     * 
+     *
      * @param  object<\Illuminate\Http\Request> $request
      * @return mixed<array|string|null>
      */
-    protected function getRequestBody(Request $request) {
+    protected function getRequestBody(Request $request)
+    {
 
         $requestBody = $request->all();
 
-        if ( ! empty($requestBody) ) {
+        if (! empty($requestBody)) {
 
             $requestBody;
         }
 
-        if ( empty($requestBody) && !empty($request->getContent()) ) {
+        if (empty($requestBody) && !empty($request->getContent())) {
 
             return $request->getContent();
         }
@@ -299,10 +310,11 @@ class RequestResponseLogManager {
 
     /**
      * Get the useable redis instance
-     * 
+     *
      * @return object<\Illuminate\Redis\Connectors\PhpRedisConnector>
      */
-    protected function getRedisInstance() {
+    protected function getRedisInstance()
+    {
 
         return $this->redis ?? Redis::connection(config('request-response-logger.redis_configs'));
     }
@@ -310,17 +322,18 @@ class RequestResponseLogManager {
 
     /**
      * Convert passed data to string
-     * 
+     *
      * @return mixed<null|string>
      */
-    protected function stringify($data) : ?string {
-        
-        if ( $data instanceof Collection ) {
-            
+    protected function stringify($data): ?string
+    {
+
+        if ($data instanceof Collection) {
+
             return json_encode($data->toArray());
         }
 
-        if ( is_array($data) ) {
+        if (is_array($data)) {
 
             return json_encode($data);
         }

@@ -2,20 +2,18 @@
 
 namespace Touhidurabir\RequestResponseLogger\Tests;
 
-use Illuminate\Http\Request;
 use PHPUnit\Framework\Attributes\Test;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Touhidurabir\RequestResponseLogger\Tests\App\Models\User;
-use Touhidurabir\RequestResponseLogger\Tests\App\Models\Profile;
 use Touhidurabir\RequestResponseLogger\Models\RequestResponseLogger;
 use Touhidurabir\RequestResponseLogger\Middlewares\LogRequestResponse;
 use Touhidurabir\RequestResponseLogger\Tests\Traits\LaravelTestBootstrapping;
 use Touhidurabir\RequestResponseLogger\Tests\Traits\TestDatabaseBootstraping;
 
-class MiddlewareTest extends TestCase { 
-
+class MiddlewareTest extends TestCase
+{
     use LaravelTestBootstrapping;
 
     use TestDatabaseBootstraping;
@@ -26,10 +24,11 @@ class MiddlewareTest extends TestCase {
      * @param  \Illuminate\Routing\Router  $router
      * @return void
      */
-    protected function defineRoutes($router) {
-        
-        Route::any('/request-response-logger-test', function() {
-            
+    protected function defineRoutes($router)
+    {
+
+        Route::any('/request-response-logger-test', function () {
+
             return response()->json([
                 'status'    => true,
                 'data'      => request()->all(),
@@ -43,11 +42,12 @@ class MiddlewareTest extends TestCase {
      * @test
      */
     #[Test]
-    public function middleware_saves_the_data_in_table() {
+    public function middleware_saves_the_data_in_table()
+    {
 
         $request = $this->get('/request-response-logger-test');
         $log = RequestResponseLogger::first();
-        
+
         $this->assertSame($log->request_method, 'GET');
 
         $request = $this->post('/request-response-logger-test');
@@ -61,7 +61,8 @@ class MiddlewareTest extends TestCase {
      * @test
      */
     #[Test]
-    public function middleware_will_save_data_along_with_auth_user() {
+    public function middleware_will_save_data_along_with_auth_user()
+    {
 
         $user = User::create(['email' => 'testuser@test.com', 'password' => Hash::make('123456')]);
 
@@ -74,5 +75,5 @@ class MiddlewareTest extends TestCase {
         $this->assertEquals($log->request_auth_user_id, $user->id);
     }
 
-    
+
 }

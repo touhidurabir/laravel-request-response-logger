@@ -9,13 +9,12 @@ use Illuminate\Support\Facades\Bus;
 use Touhidurabir\RequestResponseLogger\Jobs\StoreRequestResponse;
 use Touhidurabir\RequestResponseLogger\Jobs\DeleteRequestResponse;
 use Touhidurabir\ModelUuid\UuidGenerator\Generator as UuidGenerator;
-use Touhidurabir\RequestResponseLogger\Models\RequestResponseLogger;
 use Touhidurabir\RequestResponseLogger\Concerns\JobDispatchableMethod;
 use Touhidurabir\RequestResponseLogger\Tests\Traits\LaravelTestBootstrapping;
 use Touhidurabir\RequestResponseLogger\Tests\Traits\TestDatabaseBootstraping;
 
-class JobsTest extends TestCase {
-    
+class JobsTest extends TestCase
+{
     use LaravelTestBootstrapping;
 
     use JobDispatchableMethod;
@@ -26,7 +25,8 @@ class JobsTest extends TestCase {
      * @test
      */
     #[Test]
-    public function the_model_store_job_will_run() {
+    public function the_model_store_job_will_run()
+    {
 
         Bus::fake();
 
@@ -44,7 +44,8 @@ class JobsTest extends TestCase {
      * @test
      */
     #[Test]
-    public function the_model_store_job_store_data_to_table() {
+    public function the_model_store_job_store_data_to_table()
+    {
 
         $uuid = UuidGenerator::uuid4();
 
@@ -62,7 +63,8 @@ class JobsTest extends TestCase {
      * @test
      */
     #[Test]
-    public function the_model_delete_job_will_run() {
+    public function the_model_delete_job_will_run()
+    {
 
         Bus::fake();
 
@@ -80,7 +82,8 @@ class JobsTest extends TestCase {
      * @test
      */
     #[Test]
-    public function the_model_delete_job_will_delete_records_from_table() {
+    public function the_model_delete_job_will_delete_records_from_table()
+    {
 
         $modelClass = config('request-response-logger.model');
 

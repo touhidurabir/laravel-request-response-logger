@@ -5,7 +5,6 @@ namespace Touhidurabir\RequestResponseLogger\Tests;
 use PHPUnit\Framework\Attributes\Test;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Model;
@@ -13,8 +12,8 @@ use Touhidurabir\RequestResponseLogger\Tests\App\Models\User;
 use Touhidurabir\RequestResponseLogger\Tests\Traits\LaravelTestBootstrapping;
 use Touhidurabir\RequestResponseLogger\Tests\Traits\TestDatabaseBootstraping;
 
-class ModelTest extends TestCase {
-    
+class ModelTest extends TestCase
+{
     use LaravelTestBootstrapping;
 
     use TestDatabaseBootstraping;
@@ -23,7 +22,8 @@ class ModelTest extends TestCase {
      * @test
      */
     #[Test]
-    public function it_will_have_access_to_model_vai_config() {
+    public function it_will_have_access_to_model_vai_config()
+    {
 
         $this->assertTrue(class_exists(config('request-response-logger.model')));
     }
@@ -33,12 +33,13 @@ class ModelTest extends TestCase {
      * @test
      */
     #[Test]
-    public function it_is_a_proper_model_class() {
+    public function it_is_a_proper_model_class()
+    {
 
         $modelClass = config('request-response-logger.model');
 
-        $this->assertIsObject(new $modelClass);
-        $this->assertInstanceOf(Model::class, new $modelClass);
+        $this->assertIsObject(new $modelClass());
+        $this->assertInstanceOf(Model::class, new $modelClass());
     }
 
 
@@ -46,7 +47,8 @@ class ModelTest extends TestCase {
      * @test
      */
     #[Test]
-    public function it_will_store_data_in_table() {
+    public function it_will_store_data_in_table()
+    {
 
         $modelClass = config('request-response-logger.model');
 
@@ -62,7 +64,8 @@ class ModelTest extends TestCase {
      * @test
      */
     #[Test]
-    public function it_can_filter_records_by_defined_scopes() {
+    public function it_can_filter_records_by_defined_scopes()
+    {
 
         $modelClass = config('request-response-logger.model');
 
@@ -73,7 +76,7 @@ class ModelTest extends TestCase {
                 ['response_status_code' => '401', 'marked' => true],
                 ['response_status_code' => '404', 'marked' => true],
             ]);
-        
+
         $this->assertEquals($modelClass::count(), 4);
         $this->assertEquals($modelClass::successful()->count(), 2);
         $this->assertEquals($modelClass::failed()->count(), 2);
@@ -85,7 +88,8 @@ class ModelTest extends TestCase {
      * @test
      */
     #[Test]
-    public function it_can_handle_related_to_auth_user() {
+    public function it_can_handle_related_to_auth_user()
+    {
 
         $user = User::create(['email' => 'testuser@test.com', 'password' => Hash::make('123456')]);
 
@@ -104,7 +108,8 @@ class ModelTest extends TestCase {
      * @test
      */
     #[Test]
-    public function it_can_cast_columns_on_store_and_retrival_as_defined_in_config() {
+    public function it_can_cast_columns_on_store_and_retrival_as_defined_in_config()
+    {
 
         $modelClass = config('request-response-logger.model');
 
