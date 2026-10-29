@@ -217,6 +217,14 @@ RequestResponseLogger::with(['user'])->get();
 
 If you need more methods , just extends the default model class or create your own and register it in the published config file . 
 
+The default model also comes with a factory for the tests of your app, unless your app defines its own **`Database\Factories\Touhidurabir\RequestResponseLogger\Models\RequestResponseLoggerFactory`** : 
+
+```php
+RequestResponseLogger::factory()->count(10)->create();
+
+RequestResponseLogger::factory()->marked()->create();
+```
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
