@@ -11,10 +11,10 @@ use Touhidurabir\RequestResponseLogger\Concerns\FileHelpers;
 use Touhidurabir\RequestResponseLogger\RequestResponseLogManager;
 use Touhidurabir\RequestResponseLogger\Console\Concerns\CommandExceptionHandler;
 
-class RequestResponseLoggerExporter extends Command {
-
+class RequestResponseLoggerExporter extends Command
+{
     use FileHelpers;
-    
+
     /**
      * Process the handeled exception and provide output
      */
@@ -49,8 +49,9 @@ class RequestResponseLoggerExporter extends Command {
      *
      * @return void
      */
-    public function __construct() {
-        
+    public function __construct()
+    {
+
         parent::__construct();
     }
 
@@ -60,9 +61,12 @@ class RequestResponseLoggerExporter extends Command {
      *
      * @return mixed
      */
-    public function handle() {
-        
+    public function handle()
+    {
+
         $this->info('Initiating the exporting');
+
+        $jsonToArrayOnRetrieve = config('request-response-logger.json_to_array_on_retrieve');
 
         try {
 
@@ -74,20 +78,20 @@ class RequestResponseLoggerExporter extends Command {
             Config::set('request-response-logger.json_to_array_on_retrieve', false);
 
             // Write the headers
-            fputcsv($fp, DB::getSchemaBuilder()->getColumnListing(config('request-response-logger.table')));
+            fputcsv($fp, DB::getSchemaBuilder()->getColumnListing(config('request-response-logger.table')), ',', '"', '\\');
 
             // load the records to export as lazy collection
             $records = RequestResponseLogManager::withQuery()
-                            ->keepTill($this->option('of-last'))
+                            ->ofLast($this->option('of-last'))
                             ->withMarkedStatus($this->option('only-marked') ? true : null)
                             ->withTrashed($this->option('with-trashed'))
                             ->getQuery()
                             ->cursor();
-            
+
             // write the data/records in the CSV file
             foreach ($records as $record) {
-                
-                fputcsv($fp, $record->toArray());
+
+                fputcsv($fp, $record->toArray(), ',', '"', '\\');
             }
 
             fclose($fp);
@@ -95,14 +99,19 @@ class RequestResponseLoggerExporter extends Command {
             $this->info('Exporting has completed');
 
             return self::SUCCESS;
-            
+
         } catch (Throwable $exception) {
 
             // ray($exception);
-            
+
             $this->outputConsoleException($exception);
 
             return self::FAILURE;
+
+        } finally {
+
+            // the command may run inside the app, e.g. with Artisan::call()
+            Config::set('request-response-logger.json_to_array_on_retrieve', $jsonToArrayOnRetrieve);
         }
     }
 
@@ -113,17 +122,19 @@ class RequestResponseLoggerExporter extends Command {
      * @return string
      * @throws \Exception
      */
-    protected function generateFileToExport() : string {
+    protected function generateFileToExport(): string
+    {
 
-        $name = ($this->option('filename') ?? str_replace(' ', '_', now()->toString())) . '.csv';
+        // the default name has no characters that are invalid in a file name on any OS, like ':'
+        $name = ($this->option('filename') ?? now()->format('Y-m-d_His')) . '.csv';
 
         $path = storage_path();
 
-        if ( $this->option('path') ) {
+        if ($this->option('path')) {
 
             $path = $this->option('path');
 
-            if ( ! $this->isDirectory($path) ) {
+            if (! $this->isDirectory($path)) {
 
                 throw new Exception(sprintf("The given path [%s] does not exists", $path));
             }
@@ -131,9 +142,9 @@ class RequestResponseLoggerExporter extends Command {
 
         $fileFullPath = $path . '/' . $name;
 
-        if ( $this->fileExists($fileFullPath) ) {
+        if ($this->fileExists($fileFullPath)) {
 
-            if ( ! $this->option('replace') ) {
+            if (! $this->option('replace')) {
 
                 throw new Exception(sprintf("The given file [%s] already existed at given [%s] path", $name, $path));
             }

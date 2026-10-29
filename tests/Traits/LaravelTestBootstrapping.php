@@ -6,21 +6,22 @@ use Touhidurabir\RequestResponseLogger\Facades\RequestResponseLogger;
 use Touhidurabir\RequestResponseLogger\RequestResponseLoggerServiceProvider;
 use Touhidurabir\RequestResponseLogger\Models\RequestResponseLogger as RequestResponseLoggerModel;
 
-trait LaravelTestBootstrapping {
-
+trait LaravelTestBootstrapping
+{
     /**
      * Get package providers.
      *
      * @param  \Illuminate\Foundation\Application  $app
      * @return array
      */
-    protected function getPackageProviders($app) {
+    protected function getPackageProviders($app)
+    {
 
         return [
             RequestResponseLoggerServiceProvider::class,
         ];
     }
-    
+
 
     /**
      * Override application aliases.
@@ -28,8 +29,9 @@ trait LaravelTestBootstrapping {
      * @param  \Illuminate\Foundation\Application  $app
      * @return array
      */
-    protected function getPackageAliases($app) {
-        
+    protected function getPackageAliases($app)
+    {
+
         return [
             'RequestResponseLogger' => RequestResponseLogger::class,
         ];
@@ -42,7 +44,8 @@ trait LaravelTestBootstrapping {
      * @param  Illuminate\Foundation\Application $app
      * @return void
      */
-    protected function defineEnvironment($app) {
+    protected function defineEnvironment($app)
+    {
 
         // Setup default database to use sqlite :memory:
         $app['config']->set('database.default', 'testbench');
@@ -56,7 +59,7 @@ trait LaravelTestBootstrapping {
         $app['config']->set('app.debug', false);
         $app['config']->set('app.key', env('APP_KEY', 'base64:4vaRSWQcoaHh8mA8qIRxL1Ei+UNIj9Wst9rY+ne2rE4='));
         $app['config']->set('app.cipher', 'AES-256-CBC');
-        
+
         $app['config']->set('request-response-logger', [
             'table'                         => 'request_response_loggers',
             'model'                         => RequestResponseLoggerModel::class,
@@ -81,5 +84,5 @@ trait LaravelTestBootstrapping {
             'delete_in_segment_count'       => 2,
         ]);
     }
-    
+
 }

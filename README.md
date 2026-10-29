@@ -40,6 +40,10 @@ Before using it , please make sure to go throught he pushlished config file to k
 
 For example, the ability to push the write task to queue jobs defined by option **`log_on_queue`** and utilize the redis capability defined by option **`store_on_redis`** are set to **`false`** . So depending on your app capabilities and requirements, configure the options as you see fit . 
 
+The request body fields listed in the **`hidden_request_fields`** option are never stored. By default those are **`password`**, **`password_confirmation`** and **`current_password`**. Add any other sensitive field of your app there; nested fields can be defined with "dot" notation, like **`user.password`**. In the same way, the request and response headers listed in the **`hidden_headers`** option are never stored. By default those are the headers that carry credentials: **`authorization`**, **`cookie`**, **`set-cookie`**, **`php-auth-pw`**, **`x-csrf-token`** and **`x-xsrf-token`**.
+
+The redis connection used by **`store_on_redis`** is defined by the **`redis_configs`** option. It is either an array of connection details (host, port, database, etc.), used as a dedicated connection with the **`client`** and **`options`** of **`config/database.php`**, or the name of a redis connection defined in **`config/database.php`**, like **`'default'`** or **`'cache'`**.
+
 ### Setting Up Middleware 
 
 The most important part is is setting up the middleware as all the request/response loggin is done by the provided middleware **`\Touhidurabir\RequestResponseLogger\Middlewares\LogRequestResponse`** by the package . 
@@ -78,6 +82,23 @@ protected $middleware = [
 ];
 ```
 
+On Laravel 11 and newer, which have no **`/app/Http/Kernel.php`**, register it in **`bootstrap/app.php`** instead
+
+```php
+->withMiddleware(function (Middleware $middleware) {
+    // as a named middleware
+    $middleware->alias([
+        'requests.responses.logger' => \Touhidurabir\RequestResponseLogger\Middlewares\LogRequestResponse::class,
+    ]);
+
+    // or for a middleware group
+    $middleware->appendToGroup('api', \Touhidurabir\RequestResponseLogger\Middlewares\LogRequestResponse::class);
+
+    // or for every route
+    $middleware->append(\Touhidurabir\RequestResponseLogger\Middlewares\LogRequestResponse::class);
+})
+```
+
 Thats it. 
 
 > NOTE : It is very unrealistic that this there may be a need to log request/response for every routes of an app, though that depends on the need to application. Register the middleare as per your need and try to avoid it using a global middleare unless that what the app require . 
@@ -86,6 +107,8 @@ Thats it.
 ### Register and Run available commands
 
 This package ships with several userful commands . such as 
+
+> NOTE : On Laravel 11 and newer, which have no **`\App\Console\Kernel`** class, schedule the commands below in **`routes/console.php`** instead, e.g. **`Schedule::command('request-response-logger:clear')->weekly();`** .
 
 #### Log Cleaner
 
@@ -112,6 +135,8 @@ This package also have some handle options available as such :
 | only-unmarked  | flag    | Delete only the unmarked records                                 |
 | on-job         | flag    | Run the deletion process through a Queue Job                     |
 
+The records are deleted in segments of the **`limit`** option (or the **`delete_in_segment_count`** config). Without **`--on-job`** all the segments are deleted in one go; with it, each segment is deleted by its own queue job, which queues the next one. When Redis is reachable and the default cache store supports locks, only one cleaning job runs at a time: a queued cleaning job that finds another one running is tried again 10 seconds later, and a non queued one is skipped.
+
 
 #### Log Exporter 
 
@@ -131,7 +156,7 @@ protected function schedule(Schedule $schedule) {
 }
 ```
 
-Unless a specific file name is passed with the option **`--filename`** for this command , it will use the current Datetime as the name of the file . 
+Unless a specific file name is passed with the option **`--filename`** for this command , it will use the current Datetime as the name of the file, like **`2026-01-02_030405.csv`** . 
 
 > NOTE that this package currently only export files in CSV format. Also by default it store the exported CSV files in the **`storage`** dierctory unless provided any other path . See the available command options to know more it 
 
@@ -191,6 +216,14 @@ RequestResponseLogger::with(['user'])->get();
 ```
 
 If you need more methods , just extends the default model class or create your own and register it in the published config file . 
+
+The default model also comes with a factory for the tests of your app, unless your app defines its own **`Database\Factories\Touhidurabir\RequestResponseLogger\Models\RequestResponseLoggerFactory`** : 
+
+```php
+RequestResponseLogger::factory()->count(10)->create();
+
+RequestResponseLogger::factory()->marked()->create();
+```
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

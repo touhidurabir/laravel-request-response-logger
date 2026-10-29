@@ -2,11 +2,10 @@
 
 namespace Touhidurabir\RequestResponseLogger\Casts;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
-class JsonToArray implements CastsAttributes {
-    
+class JsonToArray implements CastsAttributes
+{
     /**
      * Cast the given value.
      *
@@ -14,12 +13,13 @@ class JsonToArray implements CastsAttributes {
      * @param  string                                       $key
      * @param  mixed                                        $value
      * @param  array                                        $attributes
-     * 
+     *
      * @return mixed
      */
-    public function get($model, $key, $value = null, $attributes = []) {
+    public function get($model, $key, $value = null, $attributes = [])
+    {
 
-        if ( config('request-response-logger.json_to_array_on_retrieve') && $this->isValidJson($value) ) {
+        if (config('request-response-logger.json_to_array_on_retrieve') && $this->isValidJson($value)) {
 
             $value = json_decode($value, true);
         }
@@ -35,12 +35,13 @@ class JsonToArray implements CastsAttributes {
      * @param  string                                       $key
      * @param  mixed                                        $value
      * @param  array                                        $attributes
-     * 
+     *
      * @return mixed
      */
-    public function set($model, $key, $value = null, $attributes = []) {
+    public function set($model, $key, $value = null, $attributes = [])
+    {
 
-        if ( is_array($value) ) {
+        if (is_array($value)) {
 
             $value = json_encode($value);
         }
@@ -55,15 +56,16 @@ class JsonToArray implements CastsAttributes {
      * @param  mixed  $value
      * @return boolean
      */
-    public function isValidJson($value) : bool {
+    public function isValidJson($value): bool
+    {
 
-        if ( ! is_string($value) ) {
+        if (! is_string($value)) {
 
             return false;
         }
 
         json_decode($value);
-        
+
         return json_last_error() === JSON_ERROR_NONE;
     }
 

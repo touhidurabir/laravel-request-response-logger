@@ -3,6 +3,7 @@
 namespace Touhidurabir\RequestResponseLogger\Jobs;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Queue\Jobs\SyncJob;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,15 +12,18 @@ use Touhidurabir\RequestResponseLogger\RequestResponseLogManager;
 use Touhidurabir\RequestResponseLogger\Concerns\JobDispatchableMethod;
 use Touhidurabir\RequestResponseLogger\Jobs\Middleware\WithoutOverlappingOfCleaningJob;
 
-class DeleteRequestResponse implements ShouldQueue {
-
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+class DeleteRequestResponse implements ShouldQueue
+{
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     use JobDispatchableMethod;
 
     /**
      * The max tirex
-     * 
+     *
      * @var int
      */
     public $tries = 3;
@@ -27,7 +31,7 @@ class DeleteRequestResponse implements ShouldQueue {
 
     /**
      * Queue timeout
-     * 
+     *
      * @var int
      */
     public $timeout = 20;
@@ -35,7 +39,7 @@ class DeleteRequestResponse implements ShouldQueue {
 
     /**
      * Keep the last provided hours record
-     * 
+     *
      * @var int
      */
     public $keepTillLast;
@@ -43,7 +47,7 @@ class DeleteRequestResponse implements ShouldQueue {
 
     /**
      * Remove only unmarked data/recoreds
-     * 
+     *
      * @var bool
      */
     public $onlyUnmarked;
@@ -51,7 +55,7 @@ class DeleteRequestResponse implements ShouldQueue {
 
     /**
      * The number to records to delete a each call
-     * 
+     *
      * @var int
      */
     public $limit;
@@ -59,7 +63,7 @@ class DeleteRequestResponse implements ShouldQueue {
 
     /**
      * The continious recursive job dispatch method
-     * 
+     *
      * @var string
      */
     public $method;
@@ -67,18 +71,20 @@ class DeleteRequestResponse implements ShouldQueue {
 
     /**
      * Create a new job instance.
-     * 
+     *
      * @param  int      $keepTillLast
      * @param  bool     $onlyUnmarked
      * @param  int      $limit
      * @param  string   $dispatchMethod
-     * 
-     * @return void 
+     *
+     * @return void
      */
-    public function __construct(int     $keepTillLast   = null, 
-                                bool    $onlyUnmarked   = null, 
-                                int     $limit          = null,
-                                string  $dispatchMethod = null) {
+    public function __construct(
+        ?int    $keepTillLast   = null,
+        ?bool   $onlyUnmarked   = null,
+        ?int    $limit          = null,
+        ?string $dispatchMethod = null
+    ) {
 
         $this->keepTillLast = $keepTillLast;
         $this->onlyUnmarked = $onlyUnmarked;
@@ -90,22 +96,43 @@ class DeleteRequestResponse implements ShouldQueue {
     /**
      * Execute the job.
      *
+     * Running synchronously, all the segments are deleted here one after the other,
+     * so that the whole cleaning holds the lock once. On a queue, one segment is
+     * deleted per job and the next segment is queued, so each job stays short.
+     *
      * @return void
      */
-    public function handle(): void {
+    public function handle(): void
+    {
 
-        $numberOfRecordsToDeleted = RequestResponseLogManager::withQuery()
-                                        ->keepTill($this->keepTillLast)
-                                        ->withMarkedStatus($this->onlyUnmarked)
-                                        ->remove($this->limit);
-                                    
-        
-        if ($numberOfRecordsToDeleted > 0) {
+        do {
 
-            $this->method = $this->method ?? $this->getDispatchMethod(false);
+            $numberOfRecordsToDeleted = RequestResponseLogManager::withQuery()
+                                            ->keepTill($this->keepTillLast)
+                                            ->withMarkedStatus($this->onlyUnmarked)
+                                            ->remove($this->limit);
+
+        } while ($numberOfRecordsToDeleted > 0 && $this->limit && $this->runsSynchronously());
+
+
+        if ($numberOfRecordsToDeleted > 0 && $this->limit && ! $this->runsSynchronously()) {
+
+            $this->method = $this->getDispatchMethod(true);
 
             self::{$this->method}($this->keepTillLast, $this->onlyUnmarked, $this->limit, $this->method);
         }
+    }
+
+
+    /**
+     * Determine if the job runs synchronously rather than on a queue
+     *
+     * @return bool
+     */
+    protected function runsSynchronously(): bool
+    {
+
+        return ! $this->job || $this->job instanceof SyncJob;
     }
 
 
@@ -114,9 +141,10 @@ class DeleteRequestResponse implements ShouldQueue {
      *
      * @return array
      */
-    public function middleware() {
+    public function middleware()
+    {
 
-        return [new WithoutOverlappingOfCleaningJob];
+        return [new WithoutOverlappingOfCleaningJob()];
     }
 
 }

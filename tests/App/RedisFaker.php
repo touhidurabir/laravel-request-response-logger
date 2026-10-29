@@ -2,8 +2,8 @@
 
 namespace Touhidurabir\RequestResponseLogger\Tests\App;
 
-class RedisFaker {
-
+class RedisFaker
+{
     /**
      * Fake redis top level storage
      *
@@ -26,7 +26,8 @@ class RedisFaker {
      * @param  array $config
      * @return void
      */
-    public function __construct(array $configs = []) {
+    public function __construct(array $configs = [])
+    {
 
         $this->configs = $configs;
         $this->storage = [];
@@ -34,14 +35,23 @@ class RedisFaker {
 
 
     /**
+     * The requested fake redis connection names
+     *
+     * @var array
+     */
+    public $connectionNames = [];
+
+
+    /**
      * Get the fake redis connection instance itself
      *
-     * @param  array $config
+     * @param  string|null $name
      * @return self
      */
-    public function connection(array $configs = []) : self {
+    public function connection($name = null): self
+    {
 
-        $this->configs = $configs;
+        $this->connectionNames[] = $name;
 
         return $this;
     }
@@ -52,10 +62,11 @@ class RedisFaker {
      *
      * @param  string $key
      * @param  mixed  $value
-     * 
+     *
      * @return int
      */
-    public function lpush(string $key, $value) : int {
+    public function lpush(string $key, $value): int
+    {
 
         array_unshift($this->getStoreByKey($key), $value);
 
@@ -69,9 +80,10 @@ class RedisFaker {
      * @param  string $key
      * @return mixed
      */
-    public function lpop(string $key) {
+    public function lpop(string $key)
+    {
 
-        if ( $this->llen($key) <= 0 ) {
+        if ($this->llen($key) <= 0) {
 
             return false;
         }
@@ -85,10 +97,11 @@ class RedisFaker {
      *
      * @param  string $key
      * @param  mixed  $value
-     * 
+     *
      * @return int
      */
-    public function rpush(string $key, $value) : int {
+    public function rpush(string $key, $value): int
+    {
 
         array_push($this->getStoreByKey($key), $value);
 
@@ -102,9 +115,10 @@ class RedisFaker {
      * @param  string $key
      * @return mixed
      */
-    public function rpop(string $key) {
+    public function rpop(string $key)
+    {
 
-        if ( $this->llen($key) <= 0 ) {
+        if ($this->llen($key) <= 0) {
 
             return false;
         }
@@ -119,7 +133,8 @@ class RedisFaker {
      * @param  string $key
      * @return int
      */
-    public function llen(string $key) : int {
+    public function llen(string $key): int
+    {
 
         return count($this->getStoreByKey($key));
     }
@@ -131,19 +146,20 @@ class RedisFaker {
      * @param  string   $key
      * @param  int      $start
      * @param  int      $end
-     * 
+     *
      * @return array
      */
-    public function lrange(string $key, int $start, int $end) : array {
+    public function lrange(string $key, int $start, int $end): array
+    {
 
-        if ( $end < 0 ) {
+        if ($end < 0) {
 
-            return $end === -1 
-                ? $this->getStoreByKey($key) 
-                : array_slice($this->getStoreByKey($key), $start, $end+1);
+            return $end === -1
+                ? $this->getStoreByKey($key)
+                : array_slice($this->getStoreByKey($key), $start, $end + 1);
         }
 
-        return array_slice($this->getStoreByKey($key), $start, $end+1);
+        return array_slice($this->getStoreByKey($key), $start, $end + 1);
     }
 
 
@@ -153,21 +169,22 @@ class RedisFaker {
      * @param  string   $key
      * @param  int      $elementsCount
      * @param  int      $direction
-     * 
+     *
      * @return bool
      */
-    public function ltrim(string $key, int $elementsCount, int $direction) : bool {
+    public function ltrim(string $key, int $elementsCount, int $direction): bool
+    {
 
         // remove first $elementsCount elements from the beginning of list
-        if ( $elementsCount > 0 && $direction < 0 ) {
+        if ($elementsCount > 0 && $direction < 0) {
 
             array_splice($this->getStoreByKey($key), 0, $elementsCount);
         }
 
         // remove first $direction elements from the end of list
-        if ( $elementsCount <= 0 && $direction < 0 ) {
+        if ($elementsCount <= 0 && $direction < 0) {
 
-            array_splice($this->getStoreByKey($key), -5);	
+            array_splice($this->getStoreByKey($key), -5);
         }
 
         return true;
@@ -180,7 +197,8 @@ class RedisFaker {
      * @param  string $key
      * @return int
      */
-    public function get(string $key) : array {
+    public function get(string $key): array
+    {
 
         return $this->getStoreByKey($key);
     }
@@ -192,7 +210,8 @@ class RedisFaker {
      * @param  bool $response
      * @return bool
      */
-    public function ping(bool $response = true) : bool {
+    public function ping(bool $response = true): bool
+    {
 
         return $response;
     }
@@ -204,9 +223,10 @@ class RedisFaker {
      * @param  string $key
      * @return int
      */
-    protected function &getStoreByKey(string $key) : array {
-        
-        if ( !array_key_exists($key, $this->storage) ) {
+    protected function &getStoreByKey(string $key): array
+    {
+
+        if (!array_key_exists($key, $this->storage)) {
 
             $this->storage[$key] = [];
         }

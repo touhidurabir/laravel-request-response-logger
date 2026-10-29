@@ -3,13 +3,12 @@
 namespace Touhidurabir\RequestResponseLogger\Middlewares;
 
 use Closure;
-use Throwable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Touhidurabir\RequestResponseLogger\RequestResponseLogManager;
 
-class LogRequestResponse {
-
+class LogRequestResponse
+{
     /**
      * Handle an incoming request.
      *
@@ -17,7 +16,8 @@ class LogRequestResponse {
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle(Request $request, Closure $next) {
+    public function handle(Request $request, Closure $next)
+    {
 
         return $next($request);
     }
@@ -28,12 +28,13 @@ class LogRequestResponse {
      *
      * @param  object<\Illuminate\Http\Request>     $request
      * @param  object<\Illuminate\Http\Response>    $response
-     * 
+     *
      * @return void
      */
-    public function terminate($request, $response) : void {
+    public function terminate($request, $response): void
+    {
 
-        (new RequestResponseLogManager)->store($request, $response);
+        (new RequestResponseLogManager())->store($request, $response);
     }
 
 }

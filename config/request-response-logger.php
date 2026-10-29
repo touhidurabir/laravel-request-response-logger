@@ -23,7 +23,7 @@ return [
     */
     'model' => \Touhidurabir\RequestResponseLogger\Models\RequestResponseLogger::class,
 
-    
+
     /*
     |--------------------------------------------------------------------------
     | Log/Store On Jobs
@@ -78,7 +78,7 @@ return [
     | Redis Max List Length
     |--------------------------------------------------------------------------
     |
-    | This define the max redis list length on which exceeds, it will initiate 
+    | This define the max redis list length on which exceeds, it will initiate
     | the process to move those data in batch to database table.
     |
     */
@@ -91,8 +91,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | This define the number of records to pull from redis list to pull and push
-    | into the DB table at a time when the max_redis_count hit . This to make 
-    | sure that DB table insertion process not to get halted when inseting a 
+    | into the DB table at a time when the max_redis_count hit . This to make
+    | sure that DB table insertion process not to get halted when inseting a
     | large number of data at a time.
     |
     */
@@ -101,7 +101,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Unique Redis Key name 
+    | Unique Redis Key name
     |--------------------------------------------------------------------------
     |
     | The unique list key name for which the data will to stored in the redis.
@@ -115,9 +115,10 @@ return [
     | Redis Configuration
     |--------------------------------------------------------------------------
     |
-    | Redis is an open source, fast, and advanced key-value store that also
-    | provides a richer body of commands than a typical key-value system
-    | such as APC or Memcached. Laravel makes it easy to dig right in.
+    | The redis connection used to store the logs. Either an array of connection
+    | details, used as a dedicated connection with the "client" and "options"
+    | of config/database.php, or the name of a redis connection defined in
+    | config/database.php, e.g. 'default' or 'cache'.
     |
     */
     'redis_configs' => [
@@ -136,10 +137,46 @@ return [
     |
     | If choose to store vai redis and for some reason failed , it will
     | try to run the log store process normally and in database table if
-    | set to true. 
+    | set to true.
     |
     */
     'fallback_on_redis_failure' => true,
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hidden Request Fields
+    |--------------------------------------------------------------------------
+    |
+    | The request body fields that will never be stored in the log. Nested
+    | fields can be defined with "dot" notation, e.g. "user.password".
+    |
+    */
+    'hidden_request_fields' => [
+        'password',
+        'password_confirmation',
+        'current_password',
+    ],
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hidden Headers
+    |--------------------------------------------------------------------------
+    |
+    | The request and response headers that will never be stored in the log,
+    | as they carry credentials like tokens and session cookies. Header names
+    | are case insensitive.
+    |
+    */
+    'hidden_headers' => [
+        'authorization',
+        'cookie',
+        'set-cookie',
+        'php-auth-pw',
+        'x-csrf-token',
+        'x-xsrf-token',
+    ],
 
 
     /*

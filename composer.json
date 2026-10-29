@@ -5,7 +5,8 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Touhidurabir\\RequestResponseLogger\\": "src/"
+            "Touhidurabir\\RequestResponseLogger\\": "src/",
+            "Touhidurabir\\RequestResponseLogger\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev" : {
@@ -20,13 +21,14 @@
         }
     ],
     "require-dev": {
-        "orchestra/testbench": "^6.22",
-        "phpunit/phpunit": "^9.5"
+        "orchestra/testbench": "^6.22||^7.0||^8.0||^9.0||^10.0||^11.0",
+        "phpunit/phpunit": "^9.5||^10.0||^11.0||^12.0",
+        "laravel/pint": "^1.0"
     },
     "require": {
         "php": ">=7.4",
-        "touhidurabir/laravel-model-uuid": "^1.0",
-        "illuminate/support": "^8.67"
+        "touhidurabir/laravel-model-uuid": "^1.2.0",
+        "laravel/framework": "^8.67||^9.0||^10.0||^11.0||^12.0||^13.0"
     },
     "extra": {
         "laravel": {
@@ -37,5 +39,9 @@
                 "RequestResponseLogger": "Touhidurabir\\RequestResponseLogger\\Facades\\RequestResponseLogger"
             }
         }
+    },
+    "scripts": {
+        "format": "pint",
+        "lint": "pint --test"
     }
 }
