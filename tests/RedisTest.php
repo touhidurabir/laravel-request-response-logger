@@ -5,6 +5,9 @@ namespace Touhidurabir\RequestResponseLogger\Tests;
 use PHPUnit\Framework\Attributes\Test;
 use Orchestra\Testbench\TestCase;
 use Mockery;
+use RuntimeException;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Redis\Connector;
@@ -351,6 +354,163 @@ class RedisTest extends TestCase
         $this->redisImportCommand->execute([]);
 
         $this->assertEquals(1, RequestResponseLogger::count());
+    }
+
+
+    /**
+     * Make the redis connection unreachable
+     *
+     * @return void
+     */
+    protected function makeRedisUnreachable()
+    {
+
+        $this->app->singleton('redis', function ($app) {
+
+            return new class () {
+                public function connection($name = null)
+                {
+                    throw new RuntimeException('Redis is unreachable');
+                }
+            };
+        });
+
+        Facade::clearResolvedInstance('redis');
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_logs_fall_back_to_the_table_when_redis_is_unreachable()
+    {
+
+        Config::set('request-response-logger.fallback_on_redis_failure', true);
+
+        $this->makeRedisUnreachable();
+
+        $this->get('/request-response-logger-test');
+
+        $this->assertEquals(1, RequestResponseLogger::count());
+        $this->assertSame('GET', RequestResponseLogger::first()->request_method);
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_redis_failure_is_thrown_without_the_fallback()
+    {
+
+        $this->makeRedisUnreachable();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Redis is unreachable');
+
+        $this->withoutExceptionHandling()->get('/request-response-logger-test');
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_logs_moved_from_redis_keep_their_content()
+    {
+
+        Config::set('request-response-logger.max_redis_count', 1);
+
+        $this->postJson('/request-response-logger-test', ['name' => 'test user']);
+
+        $this->assertEquals(0, Redis::llen(config('request-response-logger.redis_key_name')));
+
+        $log = RequestResponseLogger::first();
+
+        $this->assertNotNull($log->uuid);
+        $this->assertSame('POST', $log->request_method);
+        $this->assertSame('http://localhost/request-response-logger-test', $log->request_url);
+        $this->assertSame(['name' => 'test user'], $log->request_body);
+        $this->assertSame('application/json', $log->request_headers['content-type']);
+        $this->assertSame(['status' => true, 'data' => ['name' => 'test user']], $log->response_body);
+        $this->assertEquals(200, $log->response_status_code);
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_redis_import_command_will_import_all_the_segments()
+    {
+
+        Config::set('request-response-logger.max_redis_count', 100);
+
+        foreach (range(1, 5) as $request) {
+
+            $this->get('/request-response-logger-test');
+        }
+
+        $this->assertEquals(0, $this->redisImportCommand->execute([]));
+
+        $this->assertEquals(0, Redis::llen(config('request-response-logger.redis_key_name')));
+        $this->assertEquals(5, RequestResponseLogger::count());
+        $this->assertStringContainsString('Importing 5 records', $this->redisImportCommand->getDisplay());
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_redis_import_command_will_queue_the_segments_with_log_on_queue()
+    {
+
+        foreach (range(1, 3) as $request) {
+
+            $this->get('/request-response-logger-test');
+        }
+
+        Queue::fake();
+
+        Config::set('request-response-logger.log_on_queue', true);
+
+        $this->assertEquals(0, $this->redisImportCommand->execute([]));
+
+        $this->assertEquals(0, Redis::llen(config('request-response-logger.redis_key_name')));
+
+        Queue::assertPushed(StoreRequestResponse::class, 2);
+        Queue::assertPushed(StoreRequestResponse::class, function ($job) {
+            return $job->batch === true;
+        });
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_redis_import_command_will_tell_when_there_is_nothing_to_import()
+    {
+
+        $this->assertEquals(0, $this->redisImportCommand->execute([]));
+
+        $this->assertStringContainsString('Redis list is empty', $this->redisImportCommand->getDisplay());
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_redis_import_command_will_fail_when_redis_is_unreachable()
+    {
+
+        $this->makeRedisUnreachable();
+
+        $this->assertEquals(1, $this->redisImportCommand->execute([]));
+        $this->assertStringContainsString('Redis is unreachable', $this->redisImportCommand->getDisplay());
     }
 
 }
