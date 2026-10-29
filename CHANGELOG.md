@@ -20,3 +20,4 @@ All notable changes to this project will be documented in this file.
 - Fixed the logs stored in Redis reaching the table without `created_at`/`updated_at`, so `--keep-till-last` cleaning and `--of-last` exporting skipped them. They now keep the time of the request.
 - Fixed `request-response-logger:export --of-last=N` exporting the records older than N hours instead of the ones of the last N hours. **Behaviour change** for anyone who relied on the inverted filter.
 - README: documented middleware registration in `bootstrap/app.php` and command scheduling in `routes/console.php` for Laravel 11+.
+- Require `laravel/framework` instead of only `illuminate/support`: the queue jobs use `Illuminate\Foundation\Bus\Dispatchable`, so the package never worked without it.
