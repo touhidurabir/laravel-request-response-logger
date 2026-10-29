@@ -206,18 +206,12 @@ class RequestResponseLogManager
 
         return [
             'request_method'        => $request->method(),
-            'request_headers'       => collect($request->headers->all())
-                                            ->transform(function ($item) {
-                                                return head($item);
-                                            }) ?? [],
+            'request_headers'       => $this->getHeaders($request->headers->all()),
             'request_body'          => $this->getRequestBody($request),
             'request_url'           => $request->url(),
             'request_ip'            => $request->ip(),
             'request_auth_user_id'  => optional($request->user())->id,
-            'response_headers'      => collect($response->headers->all())
-                                            ->transform(function ($item) {
-                                                return head($item);
-                                            }) ?? [],
+            'response_headers'      => $this->getHeaders($response->headers->all()),
             'response_body'         => $response->getContent(),
             'response_status_code'  => $response->status(),
         ];
@@ -304,6 +298,28 @@ class RequestResponseLogManager
 
             throw $exception;
         }
+    }
+
+
+    /**
+     * Get the storeable headers, without the hidden ones
+     *
+     * @param  array $headers
+     * @return \Illuminate\Support\Collection
+     */
+    protected function getHeaders(array $headers)
+    {
+
+        $hiddenHeaders = array_map(
+            'strtolower',
+            config('request-response-logger.hidden_headers', ['authorization', 'cookie', 'set-cookie', 'php-auth-pw', 'x-csrf-token', 'x-xsrf-token'])
+        );
+
+        return collect($headers)
+            ->except($hiddenHeaders)
+            ->transform(function ($item) {
+                return head($item);
+            });
     }
 
 

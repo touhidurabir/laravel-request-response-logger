@@ -161,6 +161,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Hidden Headers
+    |--------------------------------------------------------------------------
+    |
+    | The request and response headers that will never be stored in the log,
+    | as they carry credentials like tokens and session cookies. Header names
+    | are case insensitive.
+    |
+    */
+    'hidden_headers' => [
+        'authorization',
+        'cookie',
+        'set-cookie',
+        'php-auth-pw',
+        'x-csrf-token',
+        'x-xsrf-token',
+    ],
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Number of records to delete in each job dispatch
     |--------------------------------------------------------------------------
     |

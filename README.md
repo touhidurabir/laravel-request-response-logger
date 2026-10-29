@@ -40,7 +40,7 @@ Before using it , please make sure to go throught he pushlished config file to k
 
 For example, the ability to push the write task to queue jobs defined by option **`log_on_queue`** and utilize the redis capability defined by option **`store_on_redis`** are set to **`false`** . So depending on your app capabilities and requirements, configure the options as you see fit . 
 
-The request body fields listed in the **`hidden_request_fields`** option are never stored. By default those are **`password`**, **`password_confirmation`** and **`current_password`**. Add any other sensitive field of your app there; nested fields can be defined with "dot" notation, like **`user.password`**. Note that the request and response headers are stored as they are.
+The request body fields listed in the **`hidden_request_fields`** option are never stored. By default those are **`password`**, **`password_confirmation`** and **`current_password`**. Add any other sensitive field of your app there; nested fields can be defined with "dot" notation, like **`user.password`**. In the same way, the request and response headers listed in the **`hidden_headers`** option are never stored. By default those are the headers that carry credentials: **`authorization`**, **`cookie`**, **`set-cookie`**, **`php-auth-pw`**, **`x-csrf-token`** and **`x-xsrf-token`**.
 
 The redis connection used by **`store_on_redis`** is defined by the **`redis_configs`** option. It is either an array of connection details (host, port, database, etc.), used as a dedicated connection with the **`client`** and **`options`** of **`config/database.php`**, or the name of a redis connection defined in **`config/database.php`**, like **`'default'`** or **`'cache'`**.
 

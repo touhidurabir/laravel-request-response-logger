@@ -137,4 +137,48 @@ class MiddlewareTest extends TestCase
     }
 
 
+    /**
+     * @test
+     */
+    #[Test]
+    public function middleware_will_not_save_the_hidden_headers()
+    {
+
+        $this->withHeaders([
+            'Authorization' => 'Bearer secret-token',
+            'X-Custom'      => 'custom-value',
+        ])->withCookie('some_cookie', 'cookie-value')->get('/request-response-logger-test');
+
+        $log = RequestResponseLogger::first();
+
+        $this->assertArrayNotHasKey('authorization', $log->request_headers);
+        $this->assertArrayNotHasKey('cookie', $log->request_headers);
+        $this->assertSame('custom-value', $log->request_headers['x-custom']);
+
+        $this->assertArrayNotHasKey('set-cookie', $log->response_headers);
+        $this->assertArrayHasKey('content-type', $log->response_headers);
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function middleware_will_save_the_headers_that_are_not_hidden()
+    {
+
+        config(['request-response-logger.hidden_headers' => ['X-Custom']]);
+
+        $this->withHeaders([
+            'Authorization' => 'Bearer secret-token',
+            'X-Custom'      => 'custom-value',
+        ])->get('/request-response-logger-test');
+
+        $log = RequestResponseLogger::first();
+
+        $this->assertSame('Bearer secret-token', $log->request_headers['authorization']);
+        $this->assertArrayNotHasKey('x-custom', $log->request_headers);
+        $this->assertArrayHasKey('set-cookie', $log->response_headers);
+    }
+
 }
