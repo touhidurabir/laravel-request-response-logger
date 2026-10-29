@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - Fixed the request body never being logged for form and JSON requests (only raw, non-arrayable content was stored). **Behaviour change:** the `request_body` column is now filled for those requests. Fields listed in the new `hidden_request_fields` config option (default `password`, `password_confirmation`, `current_password`) are left out; apps with a published config get those defaults too.
 - Fixed the migration stub's error messages: the "table already exists" message used an undefined `$table` variable, and the "table not defined" message referred to `config/redirector.php`.
 - Fixed the Redis storage (`store_on_redis`) and the `request-response-logger:redis-import` command: the `redis_configs` array was passed to Laravel as a connection name, which throws a `TypeError`. **Behaviour change:** with the default `fallback_on_redis_failure` the logs used to be written straight to the database; they now go to Redis as configured. `redis_configs` may also be the name of a connection in `config/database.php`.
+- README: documented middleware registration in `bootstrap/app.php` and command scheduling in `routes/console.php` for Laravel 11+.
 
 ## [1.0.0] - 2021-12-26
 - Initial release

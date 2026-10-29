@@ -82,6 +82,23 @@ protected $middleware = [
 ];
 ```
 
+On Laravel 11 and newer, which have no **`/app/Http/Kernel.php`**, register it in **`bootstrap/app.php`** instead
+
+```php
+->withMiddleware(function (Middleware $middleware) {
+    // as a named middleware
+    $middleware->alias([
+        'requests.responses.logger' => \Touhidurabir\RequestResponseLogger\Middlewares\LogRequestResponse::class,
+    ]);
+
+    // or for a middleware group
+    $middleware->appendToGroup('api', \Touhidurabir\RequestResponseLogger\Middlewares\LogRequestResponse::class);
+
+    // or for every route
+    $middleware->append(\Touhidurabir\RequestResponseLogger\Middlewares\LogRequestResponse::class);
+})
+```
+
 Thats it. 
 
 > NOTE : It is very unrealistic that this there may be a need to log request/response for every routes of an app, though that depends on the need to application. Register the middleare as per your need and try to avoid it using a global middleare unless that what the app require . 
@@ -90,6 +107,8 @@ Thats it.
 ### Register and Run available commands
 
 This package ships with several userful commands . such as 
+
+> NOTE : On Laravel 11 and newer, which have no **`\App\Console\Kernel`** class, schedule the commands below in **`routes/console.php`** instead, e.g. **`Schedule::command('request-response-logger:clear')->weekly();`** .
 
 #### Log Cleaner
 
