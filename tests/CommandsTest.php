@@ -250,4 +250,24 @@ class CommandsTest extends TestCase
         $this->assertTrue(File::exists($file));
     }
 
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_export_command_will_restore_the_json_cast_setting()
+    {
+
+        $this->seedLoggerTable();
+
+        $this->exportCommand->execute(['--filename' => $this->exportFileName]);
+
+        $this->assertTrue(config('request-response-logger.json_to_array_on_retrieve'));
+
+        // and when the export fails
+        $this->exportCommand->execute(['--filename' => $this->exportFileName]);
+
+        $this->assertTrue(config('request-response-logger.json_to_array_on_retrieve'));
+    }
+
 }

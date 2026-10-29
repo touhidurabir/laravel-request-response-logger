@@ -66,6 +66,8 @@ class RequestResponseLoggerExporter extends Command
 
         $this->info('Initiating the exporting');
 
+        $jsonToArrayOnRetrieve = config('request-response-logger.json_to_array_on_retrieve');
+
         try {
 
             $file = $this->generateFileToExport();
@@ -105,6 +107,11 @@ class RequestResponseLoggerExporter extends Command
             $this->outputConsoleException($exception);
 
             return self::FAILURE;
+
+        } finally {
+
+            // the command may run inside the app, e.g. with Artisan::call()
+            Config::set('request-response-logger.json_to_array_on_retrieve', $jsonToArrayOnRetrieve);
         }
     }
 
