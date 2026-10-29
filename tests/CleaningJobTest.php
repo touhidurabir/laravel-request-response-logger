@@ -9,6 +9,7 @@ use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Contracts\Queue\Job as QueueJob;
@@ -178,6 +179,91 @@ class CleaningJobTest extends TestCase
         $this->assertEquals(2, config('request-response-logger.model')::count());
 
         Queue::assertPushed(DeleteRequestResponse::class, 1);
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_cleaning_job_runs_without_a_lock_when_redis_is_unreachable()
+    {
+
+        Cache::lock($this->lockName, 600)->get();
+
+        $this->app->singleton('redis', function ($app) {
+
+            return new class () {
+                public function connection($name = null)
+                {
+                    throw new RuntimeException('Redis is unreachable');
+                }
+            };
+        });
+
+        Facade::clearResolvedInstance('redis');
+
+        DeleteRequestResponse::dispatchSync(null, null, 2, 'dispatchSync');
+
+        $this->assertEquals(0, config('request-response-logger.model')::count());
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_cleaning_job_runs_without_a_lock_when_the_cache_store_cannot_lock()
+    {
+
+        config(['cache.default' => 'not-configured-store']);
+
+        DeleteRequestResponse::dispatchSync(null, null, 2, 'dispatchSync');
+
+        $this->assertEquals(0, config('request-response-logger.model')::count());
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_cleaning_job_deletes_only_the_matching_records()
+    {
+
+        DB::table(config('request-response-logger.table'))
+            ->insert([
+                ['response_status_code' => '500', 'marked' => false, 'created_at' => now()->subHours(48)],
+                ['response_status_code' => '502', 'marked' => true, 'created_at' => now()->subHours(48)],
+            ]);
+
+        DeleteRequestResponse::dispatchSync(24, false, 1, 'dispatchSync');
+
+        $modelClass = config('request-response-logger.model');
+
+        // only the old unmarked record is deleted
+        $this->assertEquals(5, $modelClass::count());
+        $this->assertEquals(0, $modelClass::where('response_status_code', '500')->count());
+    }
+
+
+    /**
+     * @test
+     */
+    #[Test]
+    public function the_queued_cleaning_job_stops_when_there_is_nothing_left_to_delete()
+    {
+
+        DB::table(config('request-response-logger.table'))->delete();
+
+        Queue::fake();
+
+        $job = new DeleteRequestResponse(null, null, 2, 'dispatch');
+        $job->setJob(Mockery::mock(QueueJob::class));
+
+        $job->handle();
+
+        Queue::assertNothingPushed();
     }
 
 }
