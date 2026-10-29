@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+
+## [1.0.0] - 2021-12-26
+- Initial release
+
+## [1.1.0] - 2026-10-29
 - Laravel 9, 10, 11, 12 and 13 support added.
 - PHP 8.4 support: nullable parameters are now explicitly typed, and the CSV exporter passes `fputcsv()`'s escape character explicitly (no deprecation notices).
 - Require `touhidurabir/laravel-model-uuid` `^1.2.0`, which contains the Laravel 12/13 boot fix.
@@ -14,6 +20,3 @@ All notable changes to this project will be documented in this file.
 - Fixed the logs stored in Redis reaching the table without `created_at`/`updated_at`, so `--keep-till-last` cleaning and `--of-last` exporting skipped them. They now keep the time of the request.
 - Fixed `request-response-logger:export --of-last=N` exporting the records older than N hours instead of the ones of the last N hours. **Behaviour change** for anyone who relied on the inverted filter.
 - README: documented middleware registration in `bootstrap/app.php` and command scheduling in `routes/console.php` for Laravel 11+.
-
-## [1.0.0] - 2021-12-26
-- Initial release
